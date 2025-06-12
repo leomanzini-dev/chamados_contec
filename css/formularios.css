@@ -1,0 +1,313 @@
+/* css/formularios.css - Versão com Layout de Card e Seção de Ajuda */
+
+/* Card principal que contém o formulário */
+.form-card {
+    background-color: var(--cor-superficie);
+    padding: 30px 40px;
+    border-radius: var(--raio-borda);
+    box-shadow: var(--sombra-suave);
+    max-width: 900px;
+    margin: 0 auto 30px auto; /* Centraliza o card e adiciona margem inferior */
+}
+
+.form-grid-3-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--cor-texto-secundario);
+}
+
+.form-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--cor-borda);
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.btn-submit {
+    background-color: var(--cor-principal);
+    color: white;
+    font-weight: 600;
+}
+.btn-submit:hover {
+    background-color: var(--cor-secundaria);
+    opacity: 1;
+}
+
+.btn-cancelar {
+    color: var(--cor-texto-secundario);
+    text-decoration: none;
+    font-weight: 500;
+}
+.btn-cancelar:hover {
+    text-decoration: underline;
+}
+
+.form-message {
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: var(--raio-borda);
+    font-size: 1em;
+    border: 1px solid transparent;
+}
+.form-message.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border-color: #a7f3d0;
+}
+.form-message.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+/* ===== ESTILOS PARA SUGESTÕES DA BASE DE CONHECIMENTO ===== */
+.sugestoes-kb-wrapper {
+    position: relative;
+}
+
+#sugestoes-kb {
+    position: absolute;
+    width: 100%;
+    background-color: var(--cor-superficie);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    box-shadow: var(--sombra-suave);
+    z-index: 100;
+    max-height: 320px;
+    overflow-y: auto;
+    margin-top: 5px;
+    display: none;
+}
+
+.sugestoes-header {
+    padding: 12px 15px;
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: var(--cor-texto-secundario);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--cor-borda);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sugestao-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    color: var(--cor-texto-principal);
+    text-decoration: none;
+    border-bottom: 1px solid var(--cor-borda);
+    transition: background-color 0.2s ease;
+}
+
+.sugestao-item:last-child {
+    border-bottom: none;
+}
+
+.sugestao-item:hover {
+    background-color: #f0f9ff;
+    color: var(--cor-principal);
+    text-decoration: none;
+}
+
+.sugestao-item i {
+    color: var(--cor-principal);
+}
+
+
+/* ===== ESTILOS PARA A NOVA SEÇÃO DE AJUDA ===== */
+.ajuda-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.ajuda-card {
+    background-color: var(--cor-superficie);
+    padding: 25px;
+    border-radius: var(--raio-borda);
+    border: 1px solid var(--cor-borda);
+}
+
+.ajuda-card h4 {
+    font-size: 1.1rem;
+    color: var(--texto-principal);
+    margin-top: 0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ajuda-card h4 i {
+    color: var(--cor-principal);
+}
+
+.ajuda-card ul {
+    list-style: none;
+    padding: 0;
+    font-size: 0.95rem;
+}
+
+.ajuda-card ul li {
+    margin-bottom: 12px;
+    color: var(--cor-texto-secundario);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.ajuda-card ul li::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f058"; /* Ícone de check-circle */
+    color: var(--cor-principal);
+    margin-top: 4px;
+}
+
+.ajuda-card ul li a {
+    color: var(--cor-texto-principal);
+    text-decoration: none;
+    font-weight: 500;
+}
+.ajuda-card ul li a:hover {
+    color: var(--cor-principal);
+    text-decoration: underline;
+}
+
+.ajuda-card .sem-artigos {
+    font-style: italic;
+    color: var(--cor-texto-secundario);
+}
+
+/* Ajuste responsivo para a seção de ajuda */
+@media (max-width: 768px) {
+    .ajuda-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ===== ESTILOS PARA ANIMAÇÃO DE SUCESSO ===== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid var(--cor-borda);
+    border-top-color: var(--cor-principal);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.success-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    flex-direction: column;
+    text-align: center;
+}
+
+.success-checkmark {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 3;
+    stroke: #4bb71b;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #4bb71b;
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+}
+
+.success-checkmark__circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+    stroke: #4bb71b;
+    fill: none;
+    animation: stroke .6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.success-checkmark__check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke .3s cubic-bezier(0.65, 0, 0.45, 1) .8s forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes scale {
+    0%, 100% {
+        transform: none;
+    }
+    50% {
+        transform: scale3d(1.1, 1.1, 1);
+    }
+}
+
+@keyframes fill {
+    100% {
+        box-shadow: inset 0px 0px 0px 50px #4bb71b;
+    }
+}
+
+.success-modal h2 {
+    color: #333;
+    font-size: 1.8rem;
+    margin-top: 20px;
+}
+
+.success-modal p {
+    color: #555;
+    font-size: 1.1rem;
+}

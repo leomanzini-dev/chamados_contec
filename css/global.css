@@ -1,0 +1,100 @@
+/* css/global.css */
+
+/* 1. Importação da Fonte do Google Fonts (usaremos 'Inter', que é moderna e legível) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* 2. Definição das Variáveis de Cor (usando sua paleta) */
+:root {
+    --cor-principal: #3C6E71;       /* Verde Contec */
+    --cor-secundaria: #284B63;     /* Azul Escuro */
+    --cor-fundo: #f8f9fa;           /* Um cinza muito claro, mais suave que o #f4f4f4 */
+    --cor-superficie: #FFFFFF;     /* Branco para cards, containers */
+    --cor-texto-principal: #343a40; /* Cinza escuro para textos, melhor que preto puro */
+    --cor-texto-secundario: #6c757d;/* Cinza mais claro para subtextos */
+    --cor-borda: #dee2e6;           /* Cinza para bordas suaves */
+    
+    /* Cores de feedback */
+    --cor-sucesso: #198754;
+    --cor-erro: #dc3545;
+    --cor-aviso: #ffc107;
+
+    /* Estilos de interface */
+    --sombra-suave: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --raio-borda: 8px; /* Borda arredondada padrão */
+    --transicao-rapida: all 0.2s ease-in-out;
+}
+
+/* 3. Reset e Estilos de Base Globais */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif; /* Aplicando a nova fonte */
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto-principal);
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600; /* Deixa os títulos um pouco mais fortes */
+    color: var(--cor-secundaria);
+    margin-bottom: 0.75rem;
+}
+
+a {
+    color: var(--cor-principal);
+    text-decoration: none;
+    transition: var(--transicao-rapida);
+}
+
+a:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+/* Estilos de base para formulários */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    transition: var(--transicao-rapida);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--cor-principal);
+    box-shadow: 0 0 0 3px rgba(60, 110, 113, 0.2);
+}
+
+/* Estilo de base para botões */
+button, input[type="submit"] {
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--raio-borda);
+    background-color: var(--cor-principal);
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: var(--transicao-rapida);
+}
+
+button:hover, input[type="submit"]:hover {
+    opacity: 0.85;
+    transform: translateY(-2px); /* Efeito sutil de elevação */
+    box-shadow: var(--sombra-suave);
+}

@@ -1,0 +1,136 @@
+/* css/admin.css */
+/* Estilos criativos e profissionais para as tabelas de administração */
+
+/* 1. Cabeçalho da Página Administrativa */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.admin-header h1 {
+    margin: 0;
+}
+
+.btn-add-new {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--cor-principal);
+    color: white;
+    padding: 10px 20px;
+    border-radius: var(--raio-borda);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transicao-rapida);
+}
+
+.btn-add-new:hover {
+    background-color: var(--cor-secundaria);
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-suave);
+    text-decoration: none;
+    color: white;
+}
+
+
+/* 2. Contentor da Tabela (A Chave para a Responsividade) */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Adiciona scroll horizontal APENAS à tabela quando necessário */
+    background-color: white;
+    border-radius: var(--raio-borda);
+    box-shadow: var(--sombra-suave);
+    border: 1px solid var(--cor-borda);
+}
+
+/* 3. A Tabela de Dados */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px; /* Evita que a tabela fique demasiado espremida */
+}
+
+/* 4. Cabeçalho da Tabela */
+.data-table thead th {
+    background-color: #f9fafb;
+    padding: 16px 20px;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--cor-texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--cor-borda);
+    white-space: nowrap;
+}
+
+/* 5. Corpo e Linhas da Tabela */
+.data-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.data-table tbody td {
+    padding: 16px 20px;
+    border-top: 1px solid var(--cor-borda);
+    vertical-align: middle;
+    font-size: 0.95rem;
+    color: var(--cor-texto-principal);
+}
+
+/* 6. Células com Informação Especial */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.user-info .user-name {
+    font-weight: 600;
+}
+.user-info .user-email {
+    font-size: 0.85em;
+    color: var(--cor-texto-secundario);
+}
+
+/* 7. Pílulas de Status */
+.status-pill {
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.status-ativo { background-color: #d1fae5; color: #065f46; }
+.status-inativo { background-color: #e5e7eb; color: #374151; }
+
+/* 8. Célula de Ações */
+.actions-cell {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+}
+
+.btn-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--cor-texto-secundario);
+    font-size: 1.1rem;
+    transition: color 0.2s;
+    text-decoration: none;
+    padding: 5px;
+}
+.btn-action.edit:hover { color: var(--cor-principal); }
+.btn-action.delete:hover { color: var(--cor-erro); }
+

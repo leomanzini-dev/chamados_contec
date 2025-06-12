@@ -1,0 +1,127 @@
+/* css/ver_artigo.css */
+
+.artigo-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.artigo-header {
+    border-bottom: 1px solid var(--cor-borda);
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+}
+
+.artigo-header h2 {
+    font-size: 2.2rem;
+    color: var(--cor-texto-principal);
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.artigo-meta {
+    font-size: 0.9rem;
+    color: var(--cor-texto-secundario);
+}
+
+.artigo-meta span {
+    margin-right: 15px;
+}
+
+.artigo-conteudo {
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.artigo-conteudo h3 {
+    font-size: 1.5rem;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.artigo-conteudo p {
+    margin-bottom: 20px;
+}
+
+.artigo-conteudo ul,
+.artigo-conteudo ol {
+    margin-bottom: 20px;
+    padding-left: 25px;
+}
+
+.artigo-conteudo li {
+    margin-bottom: 10px;
+}
+
+.artigo-conteudo code {
+    background-color: #e9ecef;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.artigo-conteudo blockquote {
+    border-left: 4px solid var(--cor-principal);
+    padding-left: 15px;
+    margin: 20px 0;
+    font-style: italic;
+    color: var(--cor-texto-secundario);
+}
+
+.artigo-feedback {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--cor-borda);
+    text-align: center;
+}
+
+.artigo-feedback h4 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.artigo-feedback .botoes-feedback {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-feedback {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: transparent;
+    border: 1px solid var(--cor-borda);
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: var(--raio-borda);
+    font-weight: 600;
+    color: var(--cor-texto-principal);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+.btn-feedback:hover {
+    background-color: #f8f9fa;
+    border-color: #ccc;
+    text-decoration: none;
+}
+.btn-feedback i {
+    font-size: 1rem;
+}
+
+/* NOVO: Estilo para a mensagem de agradecimento */
+.feedback-agradecimento {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cor-principal);
+    text-align: center;
+    padding: 20px;
+    background-color: #f0fdf4; /* Um verde bem claro */
+    border: 1px solid #a7f3d0;
+    border-radius: var(--raio-borda);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

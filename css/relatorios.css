@@ -1,0 +1,47 @@
+/* css/relatorios.css */
+
+.grid-relatorios {
+    display: grid;
+    /* Define a primeira coluna (pizza) para ser menor que a segunda (barras) */
+    grid-template-columns: 1fr 1.5fr; 
+    gap: 30px;
+}
+
+.card-relatorio {
+    background-color: var(--cor-superficie);
+    padding: 25px;
+    border-radius: var(--raio-borda);
+    box-shadow: var(--sombra-suave);
+    display: flex;
+    flex-direction: column; /* Organiza o título e o gráfico verticalmente */
+}
+
+.card-relatorio h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    color: var(--cor-texto-principal);
+    border-bottom: 1px solid var(--cor-borda);
+    padding-bottom: 10px;
+}
+
+/* Container para o canvas do gráfico, para controlar a proporção */
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 80%; /* Ajuste a altura do gráfico dentro do card */
+    width: 80%;  /* Ajuste a largura do gráfico dentro do card */
+}
+
+
+/* Ajuste para telas menores */
+@media (max-width: 1200px) {
+    .grid-relatorios {
+        /* Faz os gráficos ficarem um abaixo do outro */
+        grid-template-columns: 1fr; 
+    }
+    .chart-container {
+        width: 90%; /* Ocupa mais espaço em telas menores */
+        height: 90%;
+    }
+}

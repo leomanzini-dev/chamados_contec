@@ -1,0 +1,95 @@
+/* css/gerenciar_chamados.css */
+/* Estilos para a tabela de gerenciamento com mais espaçamento */
+
+.content-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    overflow: hidden;
+}
+
+.content-body th, .content-body td {
+    text-align: left;
+    /* AUMENTANDO O PADDING PARA MAIS ESPAÇO INTERNO */
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--cor-borda);
+    vertical-align: middle;
+}
+
+.content-body tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.content-body thead th {
+    background-color: #f9fafb;
+    color: var(--cor-texto-secundario);
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.content-body tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Ajustes específicos para algumas colunas */
+.content-body th:first-child, .content-body td:first-child {
+    text-align: center;
+    width: 60px;
+}
+
+.content-body th:last-child, .content-body td:last-child {
+    text-align: center;
+    width: 140px;
+}
+
+.content-body td:nth-child(7),
+.content-body td:nth-child(8) {
+    white-space: nowrap;
+}
+
+.content-body .btn-acao {
+    background-color: var(--cor-principal);
+    color: white;
+    padding: 8px 14px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9em;
+    transition: var(--transicao-rapida);
+    white-space: nowrap;
+}
+
+.content-body .btn-acao:hover {
+    background-color: var(--cor-secundaria);
+    text-decoration: none;
+    opacity: 1;
+}
+
+.nenhum-chamado {
+     text-align: center;
+     padding: 40px;
+     font-size: 1.1em;
+     color: var(--cor-texto-secundario);
+}
+
+/* Estilos para as pílulas de status */
+.status {
+     padding: 5px 10px;
+     border-radius: 20px;
+     font-size: 0.75em;
+     font-weight: 700;
+     color: white;
+     text-transform: uppercase;
+     white-space: nowrap;
+     letter-spacing: 0.5px;
+     display: inline-block;
+}
+.status-aberto { background-color: #3b82f6; }
+.status-em-andamento { background-color: #f59e0b; }
+.status-aguardando-solicitante { background-color: #6b7280; }
+.status-pausado { background-color: #6366f1; }
+.status-resolvido { background-color: #22c55e; }
+.status-cancelado { background-color: #ef4444; }

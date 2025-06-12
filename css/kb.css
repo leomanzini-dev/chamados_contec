@@ -1,0 +1,140 @@
+/* css/kb.css */
+
+.kb-header {
+    background: linear-gradient(45deg, var(--cor-principal), var(--cor-secundaria));
+    color: white;
+    padding: 50px 30px;
+    border-radius: var(--raio-borda);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.kb-header h2 {
+    color: white;
+    font-size: 2rem;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.kb-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 25px;
+}
+
+.search-form {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.search-form input {
+    width: 100%;
+    padding: 15px 20px 15px 50px;
+    border-radius: 50px;
+    border: none;
+    font-size: 1rem;
+}
+
+.search-form .search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--cor-borda);
+    padding-bottom: 10px;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.category-card {
+    background-color: var(--cor-superficie);
+    padding: 25px;
+    border-radius: var(--raio-borda);
+    text-decoration: none;
+    color: var(--cor-texto-principal);
+    border: 1px solid var(--cor-borda);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--sombra-suave);
+    border-color: var(--cor-principal);
+    color: var(--cor-principal);
+    text-decoration: none;
+}
+
+.category-card .icon {
+    font-size: 1.8rem;
+    color: var(--cor-principal);
+}
+
+.category-card h4 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* ===== ESTILO ATUALIZADO PARA OS LINKS DOS ARTIGOS ===== */
+.article-list-item {
+    display: flex; /* Alinha o ícone e o texto */
+    align-items: center;
+    gap: 15px; /* Espaço entre o ícone e o texto */
+    padding: 15px;
+    border-radius: var(--raio-borda);
+    margin-bottom: 10px;
+    text-decoration: none;
+    border: 1px solid var(--cor-borda); /* Borda visível */
+    background-color: var(--cor-superficie); /* Fundo branco */
+    transition: all 0.2s ease;
+}
+.article-list-item:hover {
+    background-color: #f9fafb;
+    border-color: var(--cor-principal);
+    box-shadow: var(--sombra-suave);
+    text-decoration: none;
+}
+
+/* Adicionando um ícone de artigo */
+.article-list-item::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f15c"; /* Ícone de arquivo de texto */
+    color: var(--cor-principal);
+    font-size: 1rem;
+}
+
+.article-list-item .titulo {
+    font-weight: 600;
+    color: var(--cor-texto-principal);
+}
+
+.article-list-item .categoria {
+    font-size: 0.85rem;
+    color: var(--cor-texto-secundario);
+    margin-top: 5px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-weight: 500;
+    color: var(--cor-texto-secundario);
+}
+.back-link:hover {
+    color: var(--cor-principal);
+}

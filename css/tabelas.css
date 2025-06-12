@@ -1,0 +1,103 @@
+/* css/tabelas.css - Unificado com correções de responsividade e estilo */
+
+/* NOVO: O contentor que resolve o problema de layout */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    box-shadow: var(--sombra-suave);
+    background-color: white; /* Adicionado para garantir o fundo */
+}
+
+/* Os seus estilos existentes, agora aplicados a '.data-table' para mais especificidade */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    min-width: 900px; /* Garante que as colunas não fiquem espremidas */
+}
+
+.data-table th, .data-table td {
+    text-align: left;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--cor-borda);
+    vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table thead th {
+    background-color: #f9fafb;
+    color: var(--cor-texto-secundario);
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Seus ajustes específicos mantidos */
+.data-table th:first-child, .data-table td:first-child {
+    text-align: center;
+    width: 60px;
+}
+
+.data-table th:last-child, .data-table td:last-child {
+    text-align: center;
+    width: 140px;
+}
+
+.data-table td:nth-child(7),
+.data-table td:nth-child(8) {
+    white-space: nowrap;
+}
+
+.data-table .btn-acao {
+    background-color: var(--cor-principal);
+    color: white;
+    padding: 8px 14px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9em;
+    transition: var(--transicao-rapida);
+    white-space: nowrap;
+}
+
+.data-table .btn-acao:hover {
+    background-color: var(--cor-secundaria);
+    text-decoration: none;
+    opacity: 1;
+}
+
+.nenhum-chamado {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.1em;
+    color: var(--cor-texto-secundario);
+}
+
+/* Estilos para as pílulas de status - MELHORADOS para maior legibilidade */
+.status {
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.status-aberto { background-color: #dbeafe; color: #1e40af; }
+.status-em-andamento { background-color: #fef3c7; color: #92400e; }
+.status-aguardando-solicitante { background-color: #e5e7eb; color: #374151; }
+.status-pausado { background-color: #ede9fe; color: #5b21b6; }
+.status-resolvido { background-color: #d1fae5; color: #065f46; }
+.status-cancelado { background-color: #fee2e2; color: #991b1b; }
