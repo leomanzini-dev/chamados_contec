@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 if (isset($_SESSION['usuario_id'])) {
     header("Location: painel.php");
     exit();
@@ -21,7 +20,9 @@ if (isset($_SESSION['usuario_id'])) {
         <!-- Coluna da Esquerda (Branding) -->
         <div class="login-left">
             <div class="branding-content">
-                <h1>Welcome Back</h1>
+                <!-- << NOVO >> Logo adicionada aqui -->
+                <img src="img/logo_contec.png" alt="Logo Contec" class="login-logo">
+                <h1>Seja Bem-Vindo</h1>
                 <p>Estamos aqui para ajudar — ou pelo menos parecer que sabemos o que estamos fazendo!</p>
             </div>
         </div>
@@ -30,7 +31,7 @@ if (isset($_SESSION['usuario_id'])) {
         <div class="login-right">
             <!-- Container do Formulário -->
             <div id="form-container">
-                <h2>Sign in</h2>
+                <h2>Entrar</h2>
                 <div id="error-message-container">
                     <?php
                     if (isset($_SESSION['login_error'])) {
@@ -43,15 +44,13 @@ if (isset($_SESSION['usuario_id'])) {
                     <div class="form-group">
                         <label for="email">E-mail</label>
                         <div class="input-wrapper">
-                            <!-- ÍCONE DO E-MAIL ADICIONADO -->
-                            <i class="fa-solid fa-envelope input-icon"></i>
+                            <i class="fa-solid fa-at input-icon"></i>
                             <input type="email" id="email" name="email" required>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="senha">Senha</label>
                         <div class="input-wrapper">
-                             <!-- ÍCONE DA SENHA ADICIONADO -->
                             <i class="fa-solid fa-lock input-icon"></i>
                             <input type="password" id="senha" name="senha" required>
                             <i class="fa-solid fa-eye-slash" id="toggle-senha"></i>

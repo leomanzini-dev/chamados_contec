@@ -1,10 +1,11 @@
 <?php
 // meus_chamados.php
 $titulo_pagina = "Meus Chamados";
-$css_pagina = "tabelas.css";
+$css_pagina = "tabelas.css"; // Usa o novo CSS para as tabelas
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
+// Busca inicial de todos os chamados do colaborador
 $chamados = [];
 $sql = "SELECT t.id, t.motivo_chamado, t.data_criacao, c.nome AS nome_categoria, s.nome AS nome_status
         FROM tickets AS t
@@ -32,7 +33,23 @@ if ($stmt = $conexao->prepare($sql)) {
                 <i class="fa-solid fa-bell"></i>
                 <span class="contador" id="contador-notificacoes" style="<?php echo (!isset($total_nao_lidas) || $total_nao_lidas == 0) ? 'display: none;' : ''; ?>"><?php echo $total_nao_lidas ?? 0; ?></span>
                 <div class="notificacoes-dropdown">
-                    <!-- Conteúdo das notificações -->
+                    <div class="notificacoes-header">Notificações</div>
+                    <div class="notificacoes-body" id="notificacoes-body">
+                        <?php if (empty($lista_notificacoes)): ?>
+                            <div class="notificacao-item"><div class="mensagem">Nenhuma notificação nova.</div></div>
+                        <?php else: ?>
+                            <?php foreach ($lista_notificacoes as $notif): ?>
+                                <a href="detalhes_chamado.php?id=<?php echo $notif['id_ticket']; ?>" class="notificacao-item">
+                                    <div class="icon"><i class="fa-solid fa-ticket"></i></div>
+                                    <div>
+                                        <div class="mensagem"><?php echo htmlspecialchars($notif['mensagem']); ?></div>
+                                        <div class="data"><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($notif['data_criacao']))); ?></div>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="notificacoes-footer"><a href="notificacoes.php">Ver todas as notificações</a></div>
                 </div>
             </div>
             <span>Olá, <?php echo htmlspecialchars($nome_usuario); ?>!</span>
@@ -41,10 +58,8 @@ if ($stmt = $conexao->prepare($sql)) {
     </div>
 
     <div class="content-body">
-        <?php if (empty($chamados)): ?>
-            <p class="nenhum-chamado">Você ainda não abriu nenhum chamado.</p>
-        <?php else: ?>
-            <table>
+        <div class="table-container">
+            <table class="data-table">
                 <thead>
                     <tr>
                         <th>Nº Chamado</th>
@@ -55,40 +70,46 @@ if ($stmt = $conexao->prepare($sql)) {
                         <th>Ações</th>
                     </tr>
                 </thead>
-                <!-- << NOVO >> Adicionado ID ao corpo da tabela -->
-                <tbody id="tabela-chamados-corpo">
-                    <?php foreach ($chamados as $chamado): ?>
+                <tbody id="tabela-meus-chamados-corpo">
+                    <?php if (empty($chamados)): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($chamado['id']); ?></td>
-                            <td><?php echo htmlspecialchars($chamado['motivo_chamado']); ?></td>
-                            <td><?php echo htmlspecialchars($chamado['nome_categoria']); ?></td>
-                            <td>
-                                <span class="status status-<?php echo strtolower(str_replace(' ', '-', $chamado['nome_status'])); ?>">
-                                    <?php echo htmlspecialchars($chamado['nome_status']); ?>
-                                </span>
-                            </td>
-                            <td><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($chamado['data_criacao']))); ?></td>
-                            <td>
-                                <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn-acao">Ver Detalhes</a>
-                            </td>
+                            <td colspan="6" class="nenhum-chamado">Você ainda não abriu nenhum chamado.</td>
                         </tr>
-                    <?php endforeach; ?>
+                    <?php else: ?>
+                        <?php foreach ($chamados as $chamado): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($chamado['id']); ?></td>
+                                <td><?php echo htmlspecialchars($chamado['motivo_chamado']); ?></td>
+                                <td><?php echo htmlspecialchars($chamado['nome_categoria']); ?></td>
+                                <td>
+                                    <span class="status status-<?php echo strtolower(str_replace(' ', '-', $chamado['nome_status'])); ?>">
+                                        <?php echo htmlspecialchars($chamado['nome_status']); ?>
+                                    </span>
+                                </td>
+                                <td><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($chamado['data_criacao']))); ?></td>
+                                <td>
+                                    <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn-acao">Ver Detalhes</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
-        <?php endif; ?>
+        </div>
     </div>
 </div>
 
-<?php if($conexao) { $conexao->close(); } ?>
-    </div>
-</body>
+<?php
+if ($conexao) {
+    $conexao->close();
+}
+?>
 
-<!-- << NOVO >> Script de atualização automática para esta página -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const tipoUsuario = "<?php echo $tipo_usuario; ?>";
-
-    // Só executa se for um colaborador nesta página
+    
+    // Só executa o script para o colaborador nesta página
     if (tipoUsuario !== 'colaborador') return;
 
     function escapeHTML(str) {
@@ -104,23 +125,20 @@ document.addEventListener('DOMContentLoaded', function() {
         element.style.backgroundColor = '#fffacd';
         setTimeout(() => {
             element.style.backgroundColor = '';
-        }, 1000);
+        }, 1500);
     }
 
-    function atualizarTabelaChamados(chamados) {
-        const tabelaCorpo = document.getElementById('tabela-chamados-corpo');
+    function atualizarTabelaMeusChamados(chamados) {
+        const tabelaCorpo = document.getElementById('tabela-meus-chamados-corpo');
         if (!tabelaCorpo) return;
 
-        const htmlAtual = tabelaCorpo.innerHTML;
         let novoHtml = '';
-
-        if (chamados.length > 0) {
+        if (chamados.length === 0) {
+            novoHtml = `<tr><td colspan="6" class="nenhum-chamado">Você ainda não abriu nenhum chamado.</td></tr>`;
+        } else {
             chamados.forEach(chamado => {
-                const statusClass = 'status-' + chamado.nome_status.toLowerCase().replace(/ /g, '-');
-                const dataFormatada = new Date(chamado.data_criacao).toLocaleString('pt-BR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                });
+                const statusClass = 'status-' + (chamado.nome_status ? chamado.nome_status.toLowerCase().replace(/ /g, '-') : 'indefinido');
+                const dataFormatada = new Date(chamado.data_criacao).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
                 novoHtml += `
                     <tr>
@@ -135,34 +153,43 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Compara o HTML para evitar redesenhar sem necessidade
         if (tabelaCorpo.innerHTML.replace(/\s/g, '') !== novoHtml.replace(/\s/g, '')) {
             tabelaCorpo.innerHTML = novoHtml;
-            flashElement(tabelaCorpo);
+            flashElement(tabelaCorpo.closest('.table-container'));
         }
     }
     
-    function atualizarNotificacoes(contagem) {
+    function atualizarNotificacoes(contagem, listaNotificacoes) {
         const contador = document.getElementById('contador-notificacoes');
-        if (!contador) return;
-        
-        const contagemAtual = parseInt(contador.innerText) || 0;
+        const corpoDropdown = document.getElementById('notificacoes-body');
+        if (!contador || !corpoDropdown) return;
 
+        const contagemAtual = parseInt(contador.innerText) || 0;
         if (contagem > 0) {
             contador.innerText = contagem;
             contador.style.display = 'inline-block';
-            if (contagem > contagemAtual) {
-                flashElement(contador.closest('.notificacao-sino'));
-            }
+            if(contagem > contagemAtual) flashElement(contador);
         } else {
             contador.style.display = 'none';
         }
+
+        let novoHtmlNotif = '';
+        if(listaNotificacoes.length === 0){
+             novoHtmlNotif = `<div class="notificacao-item"><div class="mensagem">Nenhuma notificação nova.</div></div>`;
+        } else {
+            listaNotificacoes.forEach(notif => {
+                const dataFormatada = new Date(notif.data_criacao).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                novoHtmlNotif += `<a href="detalhes_chamado.php?id=${notif.id_ticket}" class="notificacao-item"><div class="icon"><i class="fa-solid fa-ticket"></i></div><div><div class="mensagem">${escapeHTML(notif.mensagem)}</div><div class="data">${dataFormatada}</div></div></a>`;
+            });
+        }
+        corpoDropdown.innerHTML = novoHtmlNotif;
     }
 
     async function verificarAtualizacoes() {
         try {
             const cacheBuster = new Date().getTime();
-            const url = `/chamados_contec/verificar_updates.php?t=${cacheBuster}`;
+            const url = `/chamados_contec/verificar_updates.php?contexto=meus_chamados&t=${cacheBuster}`;
+            
             const response = await fetch(url);
             const data = await response.json();
 
@@ -170,12 +197,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (data.tipo_usuario === 'colaborador') {
                 if (data.todos_meus_chamados) {
-                    atualizarTabelaChamados(data.todos_meus_chamados);
+                    atualizarTabelaMeusChamados(data.todos_meus_chamados);
                 }
             }
             
-            if (typeof data.notificacoes_nao_lidas !== 'undefined') {
-                atualizarNotificacoes(data.notificacoes_nao_lidas);
+            if (typeof data.notificacoes_nao_lidas !== 'undefined' && data.lista_notificacoes) {
+                atualizarNotificacoes(data.notificacoes_nao_lidas, data.lista_notificacoes);
             }
 
         } catch (error) {
@@ -186,4 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(verificarAtualizacoes, 5000);
 });
 </script>
+
+</body>
 </html>

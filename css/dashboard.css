@@ -1,7 +1,7 @@
 /* css/dashboard.css - Versão Final Unificada e Completa */
 
 :root {
-    --sidebar-bg: #111827;
+    --sidebar-bg: #142a38;
     --sidebar-text: #9ca3af;
     --sidebar-text-hover: #ffffff;
     --sidebar-active-bg: var(--cor-principal);
@@ -66,8 +66,8 @@ body.sidebar-collapsed .main-content {
 }
 
 .sidebar-header .logo {
-    height: 40px;
-    width: 40px;
+    height: 50px;
+    width: 50px;
     flex-shrink: 0;
 }
 
@@ -517,4 +517,65 @@ body.sidebar-collapsed #sidebar-toggle i {
     .dashboard-grid-listas {
         grid-template-columns: 1fr;
     }
+}
+.sidebar-header {
+    padding: 25px;
+    text-align: left;
+    /* Um gradiente subtil para dar profundidade */
+    background: linear-gradient(135deg, var(--cor-principal), var(--cor-secundaria));
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header .site-title-link {
+    text-decoration: none;
+    display: block;
+    transition: transform 0.2s ease;
+}
+
+.sidebar-header .site-title-link:hover {
+    transform: scale(1.05); /* Efeito de zoom subtil ao passar o rato */
+}
+
+/* Estilo para a palavra "CHAMADOS" */
+.sidebar-header .site-title-main {
+    display: block;
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 1px;
+}
+
+/* Estilo para a palavra "CONTEC" */
+.sidebar-header .site-title-sub {
+    display: block;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 4px; /* Espaçamento largo para um look moderno */
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+/* --- Comportamento quando a sidebar está encolhida --- */
+
+body.sidebar-collapsed .sidebar-header {
+    padding: 20px 0; /* Ajusta o padding vertical */
+    text-align: center;
+}
+
+/* Quando encolhido, mostra apenas a letra "C" como um monograma */
+body.sidebar-collapsed .site-title-link::before {
+    content: "C";
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+}
+
+/* Esconde os títulos completos quando encolhido */
+body.sidebar-collapsed .site-title-main,
+body.sidebar-collapsed .site-title-sub {
+    display: none;
 }

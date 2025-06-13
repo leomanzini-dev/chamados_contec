@@ -1,3 +1,5 @@
+/* css/login.css - Versão Criativa Final com Animações */
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
@@ -24,7 +26,6 @@ body {
     overflow: hidden;
 }
 
-/* Animação de entrada para o container */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -51,21 +52,31 @@ body {
     animation: fadeIn 0.8s ease-out forwards;
 }
 
-/* Coluna da Esquerda (Branding) */
+/* --- << ALTERADO >> Alinhamento Vertical --- */
 .login-left {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    /* Alinha o conteúdo ao topo em vez de ao centro */
+    justify-content: flex-start; 
     align-items: center;
-    padding: 40px;
+    /* Aumenta o padding superior para dar espaço */
+    padding: 40px 40px; 
     text-align: center;
     border-right: 1px solid var(--cor-borda-transparente);
 }
+/* --- Fim da Alteração --- */
 
-.login-left .login-logo {
-    max-width: 150px;
-    margin-bottom: 25px;
+.login-logo {
+    max-width: 230px; 
+    margin-bottom: 15px;
+    animation: floatAnimation 4s ease-in-out infinite;
+}
+
+@keyframes floatAnimation {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
 }
 
 .login-left h1 {
@@ -85,7 +96,6 @@ body {
     color: #d1d5db;
 }
 
-/* Coluna da Direita (Formulário) */
 .login-right {
     flex: 1.2;
     padding: 40px 50px;
@@ -114,7 +124,6 @@ body {
 .form-group label {
     display: block;
     font-size: 0.9rem;
-    /* COR ALTERADA AQUI */
     color: var(--cor-texto-claro);
     margin-bottom: 8px;
     font-weight: 500;
@@ -169,7 +178,6 @@ body {
     align-items: center;
     font-size: 0.9rem;
     margin-bottom: 25px;
-    /* COR ALTERADA AQUI */
     color: var(--cor-texto-claro);
 }
 
@@ -224,11 +232,7 @@ button[type="submit"]:hover::before {
     font-size: 0.9em;
 }
 
-/* Estilos para Animação de Login */
-.hidden {
-    display: none !important;
-}
-
+.hidden { display: none !important; }
 .fade-in { animation: fadeIn 0.5s ease-out forwards; }
 .fade-out { animation: fadeOut 0.5s ease-out forwards; }
 
@@ -245,7 +249,7 @@ button[type="submit"]:hover::before {
     justify-content: center;
     align-items: center;
     height: 100%;
-    opacity: 0; /* Começa invisível para a animação */
+    opacity: 0;
     text-align: center;
 }
 #success-animation h2 { color: var(--cor-texto-claro); }
@@ -268,18 +272,8 @@ button[type="submit"]:hover::before {
 @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
 @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 50px #4bb71b; } }
 
-/* Media Query para Responsividade */
 @media (max-width: 900px) {
-    .login-left {
-        display: none;
-    }
-    .login-container {
-        flex-direction: column;
-        width: 90%;
-        max-width: 450px;
-        min-height: auto;
-    }
-    .login-right {
-        border-left: none;
-    }
+    .login-left { display: none; }
+    .login-container { flex-direction: column; width: 90%; max-width: 450px; min-height: auto; }
+    .login-right { border-left: none; }
 }

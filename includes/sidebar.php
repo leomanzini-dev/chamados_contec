@@ -4,11 +4,11 @@
 ?>
 <aside class="sidebar">
     <div class="sidebar-header">
-        <a href="painel.php">
-            <img src="img/logo_contec.png" alt="Logo Contec" class="logo">
-        </a>
-        <span class="site-title">Chamados Contec</span>
-    </div>
+    <a href="painel.php" class="site-title-link">
+        <span class="site-title-main">CHAMADOS</span>
+        <span class="site-title-sub">CONTEC</span>
+    </a>
+</div>
     <nav class="sidebar-nav">
         <ul>
             <li class="<?php echo ($pagina_atual == 'painel.php') ? 'active' : ''; ?>">
@@ -53,3 +53,7 @@
         </button>
     </div>
 </aside>
+<script>
+  window.vapidPublicKey = '<?php echo VAPID_PUBLIC_KEY; ?>';
+</script>
+

@@ -164,12 +164,17 @@ if ($tipo_usuario == 'ti') {
             </div>
         </div>
         
-        <!-- << CORRIGIDO >> Formulário de novo comentário restaurado -->
         <div class="novo-comentario">
             <h3>Adicionar Novo Comentário</h3>
-            <form action="processa_comentario.php" method="POST">
+            <form action="processa_comentario.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="id_chamado" value="<?php echo htmlspecialchars($chamado['id']); ?>">
-                <textarea name="comentario" rows="5" placeholder="Digite seu comentário aqui..." required></textarea>
+                <textarea name="comentario" rows="5" placeholder="Digite seu comentário aqui..."></textarea>
+                
+                <div class="form-group anexo-comentario" style="margin-top: 15px;">
+                     <label for="anexos_comentario">Anexar Arquivos (Opcional)</label>
+                     <input type="file" id="anexos_comentario" name="anexos[]" multiple>
+                </div>
+
                 <?php if ($tipo_usuario == 'ti'): ?>
                     <div class="checkbox-interno">
                         <input type="checkbox" id="comentario_interno" name="comentario_interno" value="1">
@@ -180,15 +185,15 @@ if ($tipo_usuario == 'ti') {
             </form>
         </div>
 
-    </div> <!-- fecha content-body -->
-</div> <!-- fecha main-content -->
+    </div>
+</div>
 
 <?php
 if($conexao) {
     $conexao->close();
 }
 ?>
-    </div> <!-- fecha dashboard-container (do header.php) -->
+    </div>
 </body>
 
 <script>

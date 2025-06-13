@@ -1,0 +1,5 @@
+[2025-06-13 20:16:30] --- INICIANDO PROCESSAMENTO DE COMENTÁRIO ---
+[2025-06-13 20:16:30] Cenário: TI comentou. Destinatário (solicitante) ID: 18
+[2025-06-13 20:16:30] Procurando subscrições para o utilizador ID: 18. Encontradas: 1
+[2025-06-13 20:16:31] A preparar para enviar para o endpoint: https://fcm.googleapis.com/fcm/send/fYrC...
+[2025-06-13 20:16:31] ERRO CRÍTICO NA BIBLIOTECA PUSH: Subscription should have a content encoding

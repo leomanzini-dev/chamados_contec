@@ -47,26 +47,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $id_novo_ticket = $stmt_ticket->insert_id;
         $stmt_ticket->close();
 
-        // (Aqui entraria sua lógica de upload de anexos, se necessário)
-        
-        // --- LÓGICA DE NOTIFICAÇÃO ADICIONADA ---
+        // --- LÓGICA DE UPLOAD DE ANEXOS ---
+        if (isset($_FILES['anexos']) && count($_FILES['anexos']['name']) > 0 && $_FILES['anexos']['error'][0] !== UPLOAD_ERR_NO_FILE) {
+            
+            $pasta_uploads = PROJECT_ROOT_PATH . '/uploads/';
+            if (!is_dir($pasta_uploads)) {
+                mkdir($pasta_uploads, 0777, true);
+            }
+
+            $sql_anexo = "INSERT INTO anexos_tickets (id_ticket, caminho_arquivo, nome_arquivo_original, tamanho_bytes) VALUES (?, ?, ?, ?)";
+            $stmt_anexo = $conexao->prepare($sql_anexo);
+
+            foreach ($_FILES['anexos']['name'] as $key => $nome_original) {
+                if ($_FILES['anexos']['error'][$key] === UPLOAD_ERR_OK) {
+                    $nome_tmp = $_FILES['anexos']['tmp_name'][$key];
+                    $tamanho_bytes = $_FILES['anexos']['size'][$key];
+                    
+                    $nome_unico = uniqid('chamado' . $id_novo_ticket . '_', true) . '-' . basename($nome_original);
+                    $caminho_final = $pasta_uploads . $nome_unico;
+
+                    if (move_uploaded_file($nome_tmp, $caminho_final)) {
+                        $caminho_relativo = 'uploads/' . $nome_unico;
+                        $stmt_anexo->bind_param("issi", $id_novo_ticket, $caminho_relativo, $nome_original, $tamanho_bytes);
+                        $stmt_anexo->execute();
+                    }
+                }
+            }
+            $stmt_anexo->close();
+        }
+
+        // --- LÓGICA DE NOTIFICAÇÃO ---
         $destinatarios_notif = [];
         $mensagem_notificacao = "Novo chamado #" . $id_novo_ticket . " aberto por " . htmlspecialchars($nome_solicitante) . ".";
         
-        // Se um agente específico foi escolhido, busca o ID dele
         if ($id_agente_para_salvar) {
-            $sql_agente = "SELECT id FROM usuarios WHERE id = ? AND tipo_usuario = 'ti' AND ativo = 1";
-            $stmt = $conexao->prepare($sql_agente);
+            $sql_dest = "SELECT id FROM usuarios WHERE id = ? AND tipo_usuario = 'ti' AND ativo = 1";
+            $stmt = $conexao->prepare($sql_dest);
             $stmt->bind_param("i", $id_agente_para_salvar);
-            $stmt->execute();
-            $destinatarios_notif = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            $stmt->close();
-        } else { // Se não, notifica toda a equipe de TI
-            $sql_ti = "SELECT id FROM usuarios WHERE tipo_usuario = 'ti' AND ativo = 1";
-            $destinatarios_notif = $conexao->query($sql_ti)->fetch_all(MYSQLI_ASSOC);
+        } else {
+            $sql_dest = "SELECT id FROM usuarios WHERE tipo_usuario = 'ti' AND ativo = 1";
+            $stmt = $conexao->prepare($sql_dest);
         }
+        $stmt->execute();
+        $destinatarios_notif = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
 
-        // Insere a notificação para cada destinatário encontrado
         if (!empty($destinatarios_notif)) {
             $sql_nova_notif = "INSERT INTO notificacoes (id_usuario_destino, id_ticket, mensagem) VALUES (?, ?, ?)";
             $stmt_nova_notif = $conexao->prepare($sql_nova_notif);
@@ -76,16 +101,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             $stmt_nova_notif->close();
         }
-        // --- FIM DA LÓGICA DE NOTIFICAÇÃO ---
 
         $conexao->commit();
-
-        // Envia uma resposta de sucesso com o ID do novo ticket
         enviar_resposta(true, 'Chamado aberto com sucesso!', ['ticket_id' => $id_novo_ticket]);
 
     } catch (Exception $e) {
         $conexao->rollback();
-        // Em produção, seria ideal logar o erro: error_log($e->getMessage());
+        error_log("Erro ao abrir chamado: " . $e->getMessage());
         enviar_resposta(false, 'Ocorreu um erro no servidor ao abrir seu chamado.');
     }
 } else {
