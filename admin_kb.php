@@ -5,7 +5,7 @@ $css_pagina = "admin.css"; // Usa o novo ficheiro CSS
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
-// << CORRIGIDO >> Lógica PHP para buscar os artigos, sem a junção com a tabela de categorias dos chamados.
+// Lógica PHP para buscar os artigos, já corrigida
 $sql = "SELECT 
             a.id, 
             a.titulo, 
@@ -14,10 +14,8 @@ $sql = "SELECT
         FROM kb_artigos AS a
         JOIN usuarios AS u ON a.id_autor = u.id
         ORDER BY a.data_ultima_atualizacao DESC";
-
 $resultado = $conexao->query($sql);
 $artigos = $resultado->fetch_all(MYSQLI_ASSOC);
-
 ?>
 
 <div class="main-content">
@@ -43,8 +41,7 @@ $artigos = $resultado->fetch_all(MYSQLI_ASSOC);
                 <tbody>
                     <?php if (empty($artigos)): ?>
                         <tr>
-                            <!-- O colspan foi ajustado para o número correto de colunas -->
-                            <td colspan="4" class="nenhum-chamado">Nenhum artigo encontrado na base de conhecimento.</td>
+                            <td colspan="4" class="nenhum-resultado">Nenhum artigo encontrado na base de conhecimento.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($artigos as $artigo): ?>

@@ -1,23 +1,35 @@
-/* css/tabelas.css - Unificado com correções de responsividade e estilo */
+/* css/tabelas.css - Unificado com scroll vertical e cabeçalho fixo */
 
-/* NOVO: O contentor que resolve o problema de layout */
+/* 1. O Contentor da Tabela */
 .table-container {
     width: 100%;
+    /* Garante que a tabela tenha um scroll horizontal caso o conteúdo seja muito largo */
     overflow-x: auto;
+    
+    /* << ALTERAÇÃO >> Define uma altura máxima para o contentor da tabela.
+       Usei 70vh, que significa 70% da altura da janela do navegador.
+       Pode ajustar este valor (ex: 60vh ou 650px) conforme preferir. */
+    max-height: 70vh;
+    
+    /* << ALTERAÇÃO >> Adiciona uma barra de scroll vertical apenas se a tabela for mais alta que a max-height */
+    overflow-y: auto;
+    
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     box-shadow: var(--sombra-suave);
-    background-color: white; /* Adicionado para garantir o fundo */
+    background-color: white;
 }
 
-/* Os seus estilos existentes, agora aplicados a '.data-table' para mais especificidade */
+/* 2. A Tabela Principal de Dados */
+/* Mantive os seus estilos existentes, mas apliquei-os à classe .data-table para serem mais específicos */
 .data-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95rem;
-    min-width: 900px; /* Garante que as colunas não fiquem espremidas */
+    min-width: 900px; /* Garante que as colunas não fiquem demasiado espremidas */
 }
 
+/* 3. Células do Corpo e Cabeçalho */
 .data-table th, .data-table td {
     text-align: left;
     padding: 16px 20px;
@@ -29,6 +41,7 @@
     border-bottom: none;
 }
 
+/* 4. O Cabeçalho da Tabela (thead) */
 .data-table thead th {
     background-color: #f9fafb;
     color: var(--cor-texto-secundario);
@@ -37,13 +50,19 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
+    
+    /* << ALTERAÇÃO >> A "magia" que faz o cabeçalho ficar fixo no topo ao rolar */
+    position: sticky;
+    top: 0;
+    z-index: 1; /* Garante que o cabeçalho fica por cima do conteúdo da tabela */
 }
 
+/* 5. O Corpo da Tabela (tbody) */
 .data-table tbody tr:hover {
-    background-color: #f9fafb;
+    background-color: #f9fafb; /* O seu estilo de hover foi mantido */
 }
 
-/* Seus ajustes específicos mantidos */
+/* Seus ajustes específicos para colunas foram mantidos */
 .data-table th:first-child, .data-table td:first-child {
     text-align: center;
     width: 60px;
@@ -59,6 +78,7 @@
     white-space: nowrap;
 }
 
+/* Botão de Ações na tabela */
 .data-table .btn-acao {
     background-color: var(--cor-principal);
     color: white;
@@ -76,6 +96,7 @@
     opacity: 1;
 }
 
+/* Célula para quando não há resultados */
 .nenhum-chamado {
     text-align: center;
     padding: 40px;
@@ -83,21 +104,21 @@
     color: var(--cor-texto-secundario);
 }
 
-/* Estilos para as pílulas de status - MELHORADOS para maior legibilidade */
+/* Estilos para as pílulas de status - Mantidos do seu código */
 .status {
-    padding: 5px 12px;
-    border-radius: 16px;
-    font-size: 0.75rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.75em;
     font-weight: 700;
+    color: white;
     text-transform: uppercase;
     white-space: nowrap;
     letter-spacing: 0.5px;
     display: inline-block;
 }
-
-.status-aberto { background-color: #dbeafe; color: #1e40af; }
-.status-em-andamento { background-color: #fef3c7; color: #92400e; }
-.status-aguardando-solicitante { background-color: #e5e7eb; color: #374151; }
-.status-pausado { background-color: #ede9fe; color: #5b21b6; }
-.status-resolvido { background-color: #d1fae5; color: #065f46; }
-.status-cancelado { background-color: #fee2e2; color: #991b1b; }
+.status-aberto { background-color: #3b82f6; }
+.status-em-andamento { background-color: #f59e0b; }
+.status-aguardando-solicitante { background-color: #6b7280; }
+.status-pausado { background-color: #6366f1; }
+.status-resolvido { background-color: #22c55e; }
+.status-cancelado { background-color: #ef4444; }

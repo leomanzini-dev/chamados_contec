@@ -1,0 +1,13 @@
+[2025-06-16 18:58:38] --- INICIANDO PROCESSAMENTO DE ABERTURA DE CHAMADO ---
+[2025-06-16 18:58:38] config.php carregado com sucesso.
+[2025-06-16 18:58:38] conexao.php carregado com sucesso.
+[2025-06-16 18:58:38] Método POST verificado.
+[2025-06-16 18:58:38] Sessão validada para utilizador ID: 1
+[2025-06-16 18:58:38] Dados recebidos do formulário. Assunto: Teste 2
+[2025-06-16 18:58:38] Validação de campos obrigatórios passou.
+[2025-06-16 18:58:38] Transação com a base de dados iniciada.
+[2025-06-16 18:58:38] Ticket inserido com sucesso. Novo ID: 68
+[2025-06-16 18:58:38] Verificando anexos...
+[2025-06-16 18:58:38] Anexos encontrados. A processar...
+[2025-06-16 18:58:38] Commit da transação efetuado com sucesso.
+[2025-06-16 18:58:38] Enviando resposta: SUCESSO - Mensagem: Chamado aberto com sucesso!

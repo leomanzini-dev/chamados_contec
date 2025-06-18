@@ -1,13 +1,14 @@
 <?php
-// processa_abertura_chamado.php
+// processa_abertura_chamado.php - VERSÃO CORRIGIDA E COMPLETA
+
 session_start();
 require_once 'config.php';
 require_once PROJECT_ROOT_PATH . '/conexao.php';
+require_once __DIR__ . '/includes/push_service.php';
+require_once __DIR__ . '/includes/websocket_service.php';
 
-// Define o cabeçalho para retornar JSON
 header('Content-Type: application/json');
 
-// Função para enviar resposta e terminar o script
 function enviar_resposta($success, $message, $data = []) {
     echo json_encode(['success' => $success, 'message' => $message] + $data);
     exit();
@@ -15,14 +16,12 @@ function enviar_resposta($success, $message, $data = []) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // Validação básica de login
     if (!isset($_SESSION['usuario_id'])) {
         enviar_resposta(false, 'Sessão inválida. Por favor, faça login novamente.');
     }
 
-    // Coleta e validação dos dados do formulário
     $id_solicitante = $_SESSION['usuario_id'];
-    $nome_solicitante = $_SESSION['usuario_nome']; // Pega o nome para a mensagem
+    $nome_solicitante = $_SESSION['usuario_nome'];
     $motivo_chamado = trim($_POST['motivo_chamado']);
     $descricao_detalhada = trim($_POST['descricao_detalhada']);
     $id_categoria = filter_input(INPUT_POST, 'id_categoria', FILTER_VALIDATE_INT);
@@ -43,29 +42,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_ticket = $conexao->prepare($sql_ticket);
         $stmt_ticket->bind_param("isssiii", $id_solicitante, $id_agente_para_salvar, $motivo_chamado, $descricao_detalhada, $id_categoria, $id_prioridade, $id_status_aberto);
         $stmt_ticket->execute();
-        
         $id_novo_ticket = $stmt_ticket->insert_id;
         $stmt_ticket->close();
 
-        // --- LÓGICA DE UPLOAD DE ANEXOS ---
         if (isset($_FILES['anexos']) && count($_FILES['anexos']['name']) > 0 && $_FILES['anexos']['error'][0] !== UPLOAD_ERR_NO_FILE) {
-            
             $pasta_uploads = PROJECT_ROOT_PATH . '/uploads/';
-            if (!is_dir($pasta_uploads)) {
-                mkdir($pasta_uploads, 0777, true);
-            }
-
+            if (!is_dir($pasta_uploads)) { mkdir($pasta_uploads, 0777, true); }
             $sql_anexo = "INSERT INTO anexos_tickets (id_ticket, caminho_arquivo, nome_arquivo_original, tamanho_bytes) VALUES (?, ?, ?, ?)";
             $stmt_anexo = $conexao->prepare($sql_anexo);
-
             foreach ($_FILES['anexos']['name'] as $key => $nome_original) {
                 if ($_FILES['anexos']['error'][$key] === UPLOAD_ERR_OK) {
                     $nome_tmp = $_FILES['anexos']['tmp_name'][$key];
                     $tamanho_bytes = $_FILES['anexos']['size'][$key];
-                    
                     $nome_unico = uniqid('chamado' . $id_novo_ticket . '_', true) . '-' . basename($nome_original);
                     $caminho_final = $pasta_uploads . $nome_unico;
-
                     if (move_uploaded_file($nome_tmp, $caminho_final)) {
                         $caminho_relativo = 'uploads/' . $nome_unico;
                         $stmt_anexo->bind_param("issi", $id_novo_ticket, $caminho_relativo, $nome_original, $tamanho_bytes);
@@ -76,40 +66,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_anexo->close();
         }
 
-        // --- LÓGICA DE NOTIFICAÇÃO ---
-        $destinatarios_notif = [];
-        $mensagem_notificacao = "Novo chamado #" . $id_novo_ticket . " aberto por " . htmlspecialchars($nome_solicitante) . ".";
+        $destinatarios_ids = [];
+        $mensagem_notificacao_app = "Novo chamado #" . $id_novo_ticket . " aberto por " . htmlspecialchars($nome_solicitante) . ".";
         
         if ($id_agente_para_salvar) {
-            $sql_dest = "SELECT id FROM usuarios WHERE id = ? AND tipo_usuario = 'ti' AND ativo = 1";
-            $stmt = $conexao->prepare($sql_dest);
-            $stmt->bind_param("i", $id_agente_para_salvar);
+            $destinatarios_ids[] = $id_agente_para_salvar;
         } else {
-            $sql_dest = "SELECT id FROM usuarios WHERE tipo_usuario = 'ti' AND ativo = 1";
-            $stmt = $conexao->prepare($sql_dest);
+            $result_ti = $conexao->query("SELECT id FROM usuarios WHERE tipo_usuario = 'ti' AND ativo = 1");
+            while($row = $result_ti->fetch_assoc()) { $destinatarios_ids[] = $row['id']; }
         }
-        $stmt->execute();
-        $destinatarios_notif = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        $stmt->close();
 
-        if (!empty($destinatarios_notif)) {
-            $sql_nova_notif = "INSERT INTO notificacoes (id_usuario_destino, id_ticket, mensagem) VALUES (?, ?, ?)";
-            $stmt_nova_notif = $conexao->prepare($sql_nova_notif);
-            foreach ($destinatarios_notif as $destinatario) {
-                $stmt_nova_notif->bind_param("iis", $destinatario['id'], $id_novo_ticket, $mensagem_notificacao);
-                $stmt_nova_notif->execute();
+        if (!empty($destinatarios_ids)) {
+            $sql_nova_notif = $conexao->prepare("INSERT INTO notificacoes (id_usuario_destino, id_ticket, mensagem) VALUES (?, ?, ?)");
+            foreach($destinatarios_ids as $id_dest) {
+                $sql_nova_notif->bind_param("iis", $id_dest, $id_novo_ticket, $mensagem_notificacao_app);
+                $sql_nova_notif->execute();
             }
-            $stmt_nova_notif->close();
+            $sql_nova_notif->close();
+            
+            enviar_notificacao_push(
+                $conexao, $destinatarios_ids, $id_novo_ticket,
+                'Novo Chamado Aberto: #' . $id_novo_ticket,
+                htmlspecialchars($nome_solicitante) . " abriu um chamado sobre: " . htmlspecialchars($motivo_chamado),
+                'novo-chamado'
+            );
+
+            foreach($destinatarios_ids as $id_dest) {
+                enviar_para_usuario($id_dest, [ 'type' => 'global_notification', 'message' => $mensagem_notificacao_app ]);
+            }
+            
+            $payload_novo_chamado = [ 'type' => 'dashboard_new_ticket', 'payload' => [
+                    'id' => $id_novo_ticket, 'motivo_chamado' => $motivo_chamado, 'nome_solicitante' => $nome_solicitante
+                ]
+            ];
+            enviar_para_topico('dashboard-ti', $payload_novo_chamado);
+
+            $stats_ti_result = $conexao->query("SELECT (SELECT COUNT(id) FROM tickets WHERE id_status = 1) AS abertos FROM DUAL")->fetch_assoc();
+            $payload_stats = [ 'type' => 'update_dashboard_stats', 'payload' => $stats_ti_result ];
+            enviar_para_topico('dashboard-ti', $payload_stats);
         }
 
+        // ===== SEÇÃO RESTAURADA (ESSENCIAL) =====
         $conexao->commit();
         enviar_resposta(true, 'Chamado aberto com sucesso!', ['ticket_id' => $id_novo_ticket]);
 
     } catch (Exception $e) {
         $conexao->rollback();
         error_log("Erro ao abrir chamado: " . $e->getMessage());
-        enviar_resposta(false, 'Ocorreu um erro no servidor ao abrir seu chamado.');
+        enviar_resposta(false, 'Ocorreu um erro no servidor.');
     }
+    // ===== FIM DA SEÇÃO RESTAURADA =====
+
 } else {
     enviar_resposta(false, 'Método de requisição inválido.');
 }

@@ -1,5 +1,7 @@
 {
     "require": {
-        "minishlink/web-push": "^9.0"
+        "minishlink/web-push": "^9.0",
+        "cboden/ratchet": "^0.4.4",
+        "textalk/websocket": "^1.5"
     }
 }

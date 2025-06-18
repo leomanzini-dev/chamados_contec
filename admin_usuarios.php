@@ -9,7 +9,6 @@ require_once 'includes/sidebar.php';
 $sql = "SELECT id, nome_completo, email, departamento, tipo_usuario, ativo 
         FROM usuarios 
         ORDER BY nome_completo ASC";
-
 $resultado = $conexao->query($sql);
 $usuarios = $resultado->fetch_all(MYSQLI_ASSOC);
 ?>
@@ -38,7 +37,7 @@ $usuarios = $resultado->fetch_all(MYSQLI_ASSOC);
                 <tbody>
                     <?php if (empty($usuarios)): ?>
                          <tr>
-                            <td colspan="5" class="nenhum-chamado">Nenhum usuário encontrado.</td>
+                            <td colspan="5" class="nenhum-resultado">Nenhum usuário encontrado.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($usuarios as $usuario): ?>

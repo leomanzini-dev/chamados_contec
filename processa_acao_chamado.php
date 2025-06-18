@@ -3,8 +3,9 @@
 session_start();
 require_once 'config.php';
 require_once PROJECT_ROOT_PATH . '/conexao.php';
+// ===== WEBSOCKET: INCLUIR O SERVIÇO DE MENSAGENS =====
+require_once __DIR__ . '/includes/websocket_service.php';
 
-// Apenas usuários 'ti' podem executar esta ação
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] != 'ti') {
     http_response_code(403);
     die("Acesso negado.");
@@ -19,12 +20,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $id_agente_logado = $_SESSION['usuario_id'];
     $nome_agente_logado = $_SESSION['usuario_nome'];
-    $log_comentarios = []; // Array para armazenar as mensagens de log
+    $log_comentarios = [];
 
     $conexao->begin_transaction();
 
     try {
-        // Busca o estado atual do chamado ANTES de modificar
         $sql_estado_atual = "SELECT id_status, id_agente_atribuido, id_solicitante FROM tickets WHERE id = ?";
         $stmt_atual = $conexao->prepare($sql_estado_atual);
         $stmt_atual->bind_param("i", $id_chamado);
@@ -38,16 +38,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $antigo_id_agente = $estado_atual['id_agente_atribuido'];
         $id_solicitante = $estado_atual['id_solicitante'];
 
-        // Atualiza o ticket
         $id_agente_para_salvar = ($novo_id_agente > 0) ? $novo_id_agente : null;
-        $sql_update_ticket = "UPDATE tickets SET id_status = ?, id_agente_atribuido = ? WHERE id = ?";
+        $sql_update_ticket = "UPDATE tickets SET id_status = ?, id_agente_atribuido = ?, data_ultima_atualizacao = NOW() WHERE id = ?";
         $stmt_update = $conexao->prepare($sql_update_ticket);
         $stmt_update->bind_param("iii", $novo_id_status, $id_agente_para_salvar, $id_chamado);
         $stmt_update->execute();
         $stmt_update->close();
         
-        // --- GERAÇÃO DE LOGS PARA O HISTÓRICO DE COMENTÁRIOS ---
-        // Log de mudança de status
         if ($novo_id_status != $antigo_id_status) {
             $sql_nomes_status = "SELECT (SELECT nome FROM status_tickets WHERE id = ?) as nome_antigo, (SELECT nome FROM status_tickets WHERE id = ?) as nome_novo";
             $stmt_nomes = $conexao->prepare($sql_nomes_status);
@@ -58,7 +55,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $log_comentarios[] = "Status alterado de '" . htmlspecialchars($nomes['nome_antigo']) . "' para '" . htmlspecialchars($nomes['nome_novo']) . "'.";
         }
 
-        // Log de mudança de agente
         if ($id_agente_para_salvar != $antigo_id_agente) {
             $sql_nomes_agentes = "SELECT (SELECT nome_completo FROM usuarios WHERE id = ?) as nome_antigo, (SELECT nome_completo FROM usuarios WHERE id = ?) as nome_novo";
             $stmt_nomes_agentes = $conexao->prepare($sql_nomes_agentes);
@@ -71,18 +67,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $log_comentarios[] = "Chamado atribuído de '" . htmlspecialchars($nome_antigo) . "' para '" . htmlspecialchars($nome_novo) . "'.";
         }
 
-        // --- INSERIR LOGS COMO COMENTÁRIOS E GERAR NOTIFICAÇÕES ---
         if (!empty($log_comentarios)) {
             $log_texto = "Ação realizada por " . htmlspecialchars($nome_agente_logado) . ":\n- " . implode("\n- ", $log_comentarios);
             
-            // 1. Insere o log como um comentário INTERNO no histórico
-            $sql_insert_log = "INSERT INTO comentarios_tickets (id_ticket, id_usuario, comentario, interno) VALUES (?, ?, ?, 1)"; // 1 = interno
+            $sql_insert_log = "INSERT INTO comentarios_tickets (id_ticket, id_usuario, comentario, interno) VALUES (?, ?, ?, 1)";
             $stmt_log = $conexao->prepare($sql_insert_log);
             $stmt_log->bind_param("iis", $id_chamado, $id_agente_logado, $log_texto);
             $stmt_log->execute();
             $stmt_log->close();
 
-            // 2. Cria uma notificação separada para o sino do solicitante (se o status mudou)
             if ($novo_id_status != $antigo_id_status) {
                 $mensagem_notificacao = "O status do seu chamado #{$id_chamado} foi atualizado.";
                 $sql_notif = "INSERT INTO notificacoes (id_usuario_destino, id_ticket, mensagem) VALUES (?, ?, ?)";
@@ -93,12 +86,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         
+        // ===== WEBSOCKET: ENVIAR ATUALIZAÇÕES EM TEMPO REAL =====
+        // 1. Prepara um payload com os dados atualizados para a página de detalhes
+        $sql_dados_atualizados = "SELECT t.data_ultima_atualizacao, agente.nome_completo AS nome_agente, s.nome AS nome_status FROM tickets t LEFT JOIN usuarios agente ON t.id_agente_atribuido = agente.id JOIN status_tickets s ON t.id_status = s.id WHERE t.id = ?";
+        $stmt_dados = $conexao->prepare($sql_dados_atualizados);
+        $stmt_dados->bind_param("i", $id_chamado);
+        $stmt_dados->execute();
+        $dados_para_ws = $stmt_dados->get_result()->fetch_assoc();
+        $stmt_dados->close();
+
+        // 2. Envia a atualização para todos que estiverem vendo a página do chamado
+        enviar_para_topico("chamado-{$id_chamado}", ['type' => 'update_ticket_details', 'payload' => $dados_para_ws]);
+
+        // 3. Se o status mudou, envia a notificação para o sino do solicitante
+        if ($novo_id_status != $antigo_id_status) {
+             enviar_para_usuario($id_solicitante, ['type' => 'global_notification', 'message' => "O status do seu chamado #{$id_chamado} foi atualizado."]);
+        }
+        
         $conexao->commit();
         $_SESSION['form_message_type'] = 'success';
         $_SESSION['form_message'] = "Chamado atualizado com sucesso!";
 
     } catch (Exception $e) {
         $conexao->rollback();
+        error_log("Erro ao atualizar chamado: " . $e->getMessage());
         $_SESSION['form_message_type'] = 'error';
         $_SESSION['form_message'] = "Erro ao atualizar o chamado.";
     }

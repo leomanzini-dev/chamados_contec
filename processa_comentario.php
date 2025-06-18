@@ -1,15 +1,16 @@
 <?php
-// processa_comentario.php - VERSÃO FINAL
+// processa_comentario.php
 
 session_start();
 require_once 'config.php';
 require_once PROJECT_ROOT_PATH . '/conexao.php';
-require_once __DIR__ . '/vendor/autoload.php';
-use Minishlink\WebPush\WebPush;
-use Minishlink\WebPush\Subscription;
+require_once __DIR__ . '/includes/push_service.php';
+// ===== WEBSOCKET: INCLUIR O SERVIÇO DE MENSAGENS =====
+require_once __DIR__ . '/includes/websocket_service.php';
 
 if (!isset($_SESSION['usuario_id'])) {
-    http_response_code(403); die("Acesso não autorizado.");
+    http_response_code(403);
+    die("Acesso não autorizado.");
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -22,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $eh_interno = ($tipo_usuario == 'ti' && isset($_POST['comentario_interno'])) ? 1 : 0;
 
     if (!$id_chamado || (empty($comentario_texto) && empty($_FILES['anexos']['name'][0]))) {
+        $_SESSION['mensagem_erro'] = "Você precisa escrever um comentário ou anexar um ficheiro.";
         header("Location: detalhes_chamado.php?id=" . $id_chamado);
         exit();
     }
@@ -36,55 +38,110 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!$ticket_info) { die("Chamado não encontrado."); }
     if ($tipo_usuario != 'ti' && $ticket_info['id_solicitante'] != $id_usuario_comentou) { die("Sem permissão."); }
 
-    // Inserir o comentário...
-    $sql_insert = "INSERT INTO comentarios_tickets (id_ticket, id_usuario, comentario, interno) VALUES (?, ?, ?, ?)";
-    $stmt_insert = $conexao->prepare($sql_insert);
-    $stmt_insert->bind_param("iisi", $id_chamado, $id_usuario_comentou, $comentario_texto, $eh_interno);
-    $stmt_insert->execute();
-    $id_novo_comentario = $stmt_insert->insert_id;
-    $stmt_insert->close();
+    $conexao->begin_transaction();
 
-    // Lógica de upload de anexos...
+    try {
+        $sql_insert = "INSERT INTO comentarios_tickets (id_ticket, id_usuario, comentario, interno) VALUES (?, ?, ?, ?)";
+        $stmt_insert = $conexao->prepare($sql_insert);
+        $stmt_insert->bind_param("iisi", $id_chamado, $id_usuario_comentou, $comentario_texto, $eh_interno);
+        $stmt_insert->execute();
+        $id_novo_comentario = $stmt_insert->insert_id;
+        $stmt_insert->close();
 
-    // --- LÓGICA DE NOTIFICAÇÃO (App e Push) ---
-    if ($eh_interno == 0) {
-        $destinatarios_ids = [];
-        // ... (sua lógica para determinar os destinatários) ...
-
-        if (!empty($destinatarios_ids)) {
-            // Insere a notificação no sino do site...
-
-            // ENVIA A NOTIFICAÇÃO PUSH
-            $ids_para_query = implode(',', array_map('intval', $destinatarios_ids));
-            $sql_subs = "SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE id_usuario IN ($ids_para_query)";
-            $subscriptions_result = $conexao->query($sql_subs);
-
-            if ($subscriptions_result && $subscriptions_result->num_rows > 0) {
-                $auth = ['VAPID' => ['subject' => 'mailto:seu-email@seudominio.com', 'publicKey' => VAPID_PUBLIC_KEY, 'privateKey' => VAPID_PRIVATE_KEY]];
-                $webPush = new WebPush($auth);
-                $payload = json_encode([/*... seu payload ...*/]);
-
-                while ($sub = $subscriptions_result->fetch_assoc()) {
-                    
-                    // << CORREÇÃO >> Criamos o objeto de subscrição com todos os dados necessários.
-                    $subscription = Subscription::create([
-                        "endpoint" => $sub['endpoint'],
-                        "publicKey" => $sub['p256dh'],
-                        "authToken" => $sub['auth'],
-                        "contentEncoding" => "aesgcm" // A informação que estava em falta
-                    ]);
-
-                    $webPush->queueNotification($subscription, $payload);
-                }
-
-                foreach ($webPush->flush() as $report) {
-                    // ... (lógica para tratar os relatórios de envio) ...
+        if (isset($_FILES['anexos']) && count($_FILES['anexos']['name']) > 0 && $_FILES['anexos']['error'][0] !== UPLOAD_ERR_NO_FILE) {
+            $pasta_uploads = PROJECT_ROOT_PATH . '/uploads/';
+            if (!is_dir($pasta_uploads)) { mkdir($pasta_uploads, 0777, true); }
+            $sql_anexo = "INSERT INTO anexos_tickets (id_ticket, id_comentario, caminho_arquivo, nome_arquivo_original, tamanho_bytes) VALUES (?, ?, ?, ?, ?)";
+            $stmt_anexo = $conexao->prepare($sql_anexo);
+            foreach ($_FILES['anexos']['name'] as $key => $nome_original) {
+                if ($_FILES['anexos']['error'][$key] === UPLOAD_ERR_OK) {
+                    $nome_tmp = $_FILES['anexos']['tmp_name'][$key];
+                    $tamanho_bytes = $_FILES['anexos']['size'][$key];
+                    $nome_unico = uniqid('comentario' . $id_novo_comentario . '_', true) . '-' . basename($nome_original);
+                    $caminho_final = $pasta_uploads . $nome_unico;
+                    if (move_uploaded_file($nome_tmp, $caminho_final)) {
+                        $caminho_relativo = 'uploads/' . $nome_unico;
+                        $stmt_anexo->bind_param("iissi", $id_chamado, $id_novo_comentario, $caminho_relativo, $nome_original, $tamanho_bytes);
+                        $stmt_anexo->execute();
+                    }
                 }
             }
+            $stmt_anexo->close();
         }
-    }
+        
+        if ($eh_interno == 0) {
+            $destinatarios_ids = [];
+            $mensagem_notificacao_app = "";
+            $titulo_push = "Novo Comentário no Chamado #{$id_chamado}";
+            $corpo_push = htmlspecialchars($nome_usuario_comentou) . ": " . (strlen($comentario_texto) > 50 ? substr($comentario_texto, 0, 50) . '...' : $comentario_texto);
 
-    // Atualiza a data do ticket e redireciona...
+            if ($tipo_usuario == 'ti') {
+                $destinatarios_ids[] = $ticket_info['id_solicitante'];
+                $mensagem_notificacao_app = "A equipa de TI comentou no seu chamado #" . $id_chamado . ".";
+            } else {
+                if (!empty($ticket_info['id_agente_atribuido'])) {
+                    $destinatarios_ids[] = $ticket_info['id_agente_atribuido'];
+                } else {
+                    $sql_ti = "SELECT id FROM usuarios WHERE tipo_usuario = 'ti' AND ativo = 1";
+                    $result_ti = $conexao->query($sql_ti);
+                    while($row = $result_ti->fetch_assoc()) {
+                        $destinatarios_ids[] = $row['id'];
+                    }
+                }
+                $mensagem_notificacao_app = "O solicitante comentou no chamado #" . $id_chamado . ".";
+            }
+
+            $destinatarios_ids = array_filter($destinatarios_ids, function($id) use ($id_usuario_comentou) { return $id != $id_usuario_comentou; });
+            $destinatarios_ids = array_unique($destinatarios_ids);
+
+            if (!empty($destinatarios_ids)) {
+                $sql_nova_notif = "INSERT INTO notificacoes (id_usuario_destino, id_ticket, mensagem) VALUES (?, ?, ?)";
+                $stmt_nova_notif = $conexao->prepare($sql_nova_notif);
+                foreach ($destinatarios_ids as $id_destinatario) {
+                    $stmt_nova_notif->bind_param("iis", $id_destinatario, $id_chamado, $mensagem_notificacao_app);
+                    $stmt_nova_notif->execute();
+                }
+                $stmt_nova_notif->close();
+                
+                enviar_notificacao_push($conexao, $destinatarios_ids, $id_chamado, $titulo_push, $corpo_push, 'comentario-' . $id_novo_comentario);
+
+                // ===== WEBSOCKET: ENVIAR ATUALIZAÇÕES EM TEMPO REAL (CORRIGIDO) =====
+                // 1. Enviar notificação para o sino de cada destinatário
+                foreach($destinatarios_ids as $id_dest) {
+                    enviar_para_usuario($id_dest, ['type' => 'global_notification', 'message' => $mensagem_notificacao_app]);
+                }
+
+                // 2. Enviar o novo comentário para o tópico do chamado
+                $payload_comentario = ['type' => 'new_comment_added', 'payload' => [
+                    'nome_usuario' => $nome_usuario_comentou,
+                    'comentario' => $comentario_texto,
+                    'interno' => $eh_interno,
+                    'data_comentario' => date('Y-m-d H:i:s')
+                ]];
+                enviar_para_topico("chamado-{$id_chamado}", $payload_comentario);
+
+                // 3. Enviar a atualização da "Última Atualização" do ticket
+                $payload_detalhes = ['type' => 'update_ticket_details', 'payload' => [
+                    'data_ultima_atualizacao' => date('Y-m-d H:i:s')
+                ]];
+                enviar_para_topico("chamado-{$id_chamado}", $payload_detalhes);
+            }
+        }
+        
+        $sql_update = "UPDATE tickets SET data_ultima_atualizacao = NOW() WHERE id = ?";
+        $stmt_update = $conexao->prepare($sql_update);
+        $stmt_update->bind_param("i", $id_chamado);
+        $stmt_update->execute();
+        $stmt_update->close();
+
+        $conexao->commit();
+        
+    } catch (Exception $e) {
+        $conexao->rollback();
+        error_log("Erro ao processar comentário: " . $e->getMessage());
+        $_SESSION['mensagem_erro'] = "Ocorreu um erro ao processar sua solicitação.";
+    }
+    
     header("Location: detalhes_chamado.php?id=" . $id_chamado);
     exit();
 }

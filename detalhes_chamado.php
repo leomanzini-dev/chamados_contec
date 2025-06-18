@@ -198,119 +198,77 @@ if($conexao) {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const idChamado = <?php echo $id_chamado; ?>;
-    const tipoUsuario = "<?php echo $tipo_usuario; ?>";
 
-    function escapeHTML(str) {
-        if (typeof str !== 'string') return '';
-        const p = document.createElement('p');
-        p.textContent = str;
-        return p.innerHTML;
-    }
-    
-    function flashElement(element) {
-        if (!element) return;
-        element.style.transition = 'background-color 0.2s';
-        element.style.backgroundColor = '#fffacd';
-        setTimeout(() => {
-            element.style.backgroundColor = '';
-        }, 1500);
-    }
+    // ===== OUVINTES DE EVENTOS WEBSOCKET =====
+    // A MUDANÇA ESTÁ AQUI: Nós adicionamos "ouvintes" para os eventos que o cliente dispara.
+
+    // Ouve pelo evento que atualiza os detalhes do chamado (status, agente, etc.)
+    document.addEventListener('ws:update_ticket_details', function(event) {
+        console.log("Evento 'ws:update_ticket_details' recebido!");
+        const detalhes = event.detail; // Os dados da mensagem estão em event.detail
+        atualizarDetalhes(detalhes);
+    });
+
+    // Ouve pelo evento que adiciona um novo comentário
+    document.addEventListener('ws:new_comment_added', function(event) {
+        console.log("Evento 'ws:new_comment_added' recebido!");
+        const comentario = event.detail;
+        adicionarNovoComentario(comentario);
+    });
+
+
+    // ===== FUNÇÕES QUE ATUALIZAM A INTERFACE =====
+    // Estas são as suas funções originais que manipulam o HTML. Elas não mudam.
 
     function atualizarDetalhes(detalhes) {
         if (!detalhes) return;
-        
         const elStatus = document.getElementById('detalhes-status');
         const elAgente = document.getElementById('detalhes-agente');
         const elAtualizacao = document.getElementById('detalhes-ultima-atualizacao');
-        
-        const novoStatusClass = 'status status-' + detalhes.nome_status.toLowerCase().replace(/ /g, '-');
-        if (elStatus.innerText !== detalhes.nome_status) {
-            elStatus.innerText = detalhes.nome_status;
-            elStatus.className = novoStatusClass;
-            flashElement(elStatus);
-        }
 
-        const novoAgenteTexto = '<strong>Agente Atribuído:</strong> ' + (detalhes.nome_agente ? escapeHTML(detalhes.nome_agente) : 'Não atribuído');
-        if(elAgente.innerHTML !== novoAgenteTexto) {
-            elAgente.innerHTML = novoAgenteTexto;
-            flashElement(elAgente);
+        if (elStatus && detalhes.nome_status) {
+            elStatus.innerText = detalhes.nome_status;
+            elStatus.className = 'status status-' + detalhes.nome_status.toLowerCase().replace(/ /g, '-');
         }
-        
-        const novaData = new Date(detalhes.data_ultima_atualizacao).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        const novaAtualizacaoTexto = '<strong>Última Atualização:</strong> ' + novaData;
-        if(elAtualizacao.innerHTML.trim() !== novaAtualizacaoTexto.trim()) {
-            elAtualizacao.innerHTML = novaAtualizacaoTexto;
-            flashElement(elAtualizacao);
+        if (elAgente && typeof detalhes.nome_agente !== 'undefined') {
+            elAgente.innerHTML = '<strong>Agente Atribuído:</strong> ' + (detalhes.nome_agente ? detalhes.nome_agente : 'Não atribuído');
+        }
+        if (elAtualizacao && detalhes.data_ultima_atualizacao) {
+            const novaData = new Date(detalhes.data_ultima_atualizacao).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            elAtualizacao.innerHTML = '<strong>Última Atualização:</strong> ' + novaData;
         }
     }
 
-    function atualizarComentarios(comentarios) {
+    function adicionarNovoComentario(comentario) {
         const lista = document.getElementById('lista-comentarios');
         if (!lista) return;
 
-        let novoHtml = '';
-        if (comentarios.length === 0) {
-            novoHtml = '<p class="nenhum-comentario">Nenhum comentário ainda.</p>';
-        } else {
-            comentarios.forEach(comentario => {
-                if (tipoUsuario !== 'ti' && comentario.interno == 1) {
-                    return;
-                }
-                
-                const dataFormatada = new Date(comentario.data_comentario).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                const tagInterno = comentario.interno == 1 ? '<span class="tag-interno">INTERNO</span>' : '';
-                const classeInterno = comentario.interno == 1 ? 'interno' : '';
-                const corpoComentario = comentario.comentario.replace(/\n/g, '<br>');
-
-                novoHtml += `
-                    <div class="comentario ${classeInterno}">
-                        <div class="comentario-header">
-                            <strong>${escapeHTML(comentario.nome_usuario)}</strong> comentou em ${dataFormatada}
-                            ${tagInterno}
-                        </div>
-                        <div class="comentario-corpo">
-                            ${corpoComentario}
-                        </div>
-                    </div>
-                `;
-            });
+        const itemVazio = lista.querySelector('.nenhum-comentario');
+        if (itemVazio) {
+            itemVazio.remove();
         }
         
-        if (lista.innerHTML.replace(/\s/g, '') !== novoHtml.replace(/\s/g, '')) {
-            const scrollNoFundo = (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50;
-            
-            lista.innerHTML = novoHtml;
-            flashElement(lista.closest('.historico-chamado'));
-            
-            if(scrollNoFundo){
-                window.scrollTo(0, document.body.scrollHeight);
-            }
-        }
-    }
+        const dataFormatada = new Date(comentario.data_comentario).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const tagInterno = comentario.interno == 1 ? '<span class="tag-interno">INTERNO</span>' : '';
+        const classeInterno = comentario.interno == 1 ? 'interno' : '';
+        const corpoComentario = (comentario.comentario || '').replace(/\n/g, '<br>');
 
-    async function verificarAtualizacoes() {
-        try {
-            const cacheBuster = new Date().getTime();
-            const url = `/chamados_contec/verificar_updates.php?id_chamado=${idChamado}&t=${cacheBuster}`;
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.error) { return; }
-            
-            if (data.detalhes_chamado) {
-                atualizarDetalhes(data.detalhes_chamado);
-            }
-            if (data.comentarios) {
-                atualizarComentarios(data.comentarios);
-            }
-        } catch (error) {
-            console.error("Erro na verificação:", error);
-        }
+        const novoComentarioDiv = document.createElement('div');
+        novoComentarioDiv.className = `comentario ${classeInterno}`;
+        novoComentarioDiv.innerHTML = `
+            <div class="comentario-header">
+                <strong>${comentario.nome_usuario}</strong> comentou em ${dataFormatada}
+                ${tagInterno}
+            </div>
+            <div class="comentario-corpo">
+                ${corpoComentario}
+            </div>
+        `;
+        lista.appendChild(novoComentarioDiv);
+        novoComentarioDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
-    
-    setInterval(verificarAtualizacoes, 3000);
 });
 </script>
 
+</html>
 </html>

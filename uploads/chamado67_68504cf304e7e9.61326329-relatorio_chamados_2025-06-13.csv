@@ -1,0 +1,10 @@
+﻿"ID Chamado";Assunto;Descricao;Solicitante;"Email Solicitante";Departamento;"Agente Atribuido";Categoria;Prioridade;Status;"Data Criacao";"Hora Criacao";"Data Ultima Atualizacao";"Hora Ultima Atualizacao";"Data Resolucao";"Hora Resolucao"
+42;"Segunda Tela";"Minha segunda tela desligou do nada, antes de desligar, ficou piscando.";"Colaborador Teste";colaborador@contec1996.com.br;Financeiro;"Leonardo Emanuel Manzini";Monitor;Média;Resolvido;2025-06-12;19:19:33;2025-06-12;19:56:12;;
+43;Mouse;"Meu mouse parou de clicar com o botão direito.";"Colaborador Teste";colaborador@contec1996.com.br;Financeiro;"Leonardo Emanuel Manzini";Mouse;Alta;Resolvido;2025-06-12;19:20:55;2025-06-12;22:54:10;;
+44;GOV;"Meu gov.br não está acessando, tentei várias vezes.";"Colaborador Teste";colaborador@contec1996.com.br;Financeiro;"Leonardo Emanuel Manzini";Software;Alta;Resolvido;2025-06-12;19:23:30;2025-06-12;22:42:03;;
+45;Teste;Teste;"Colaborador Teste";colaborador@contec1996.com.br;Financeiro;"Leonardo Emanuel Manzini";Mouse;Baixa;Cancelado;2025-06-12;19:48:19;2025-06-13;08:40:45;;
+46;Questor;"Questor travou.";"Colaborador Teste";colaborador@contec1996.com.br;Financeiro;"Leonardo Emanuel Manzini";Questor;Alta;Resolvido;2025-06-13;08:45:26;2025-06-13;08:52:39;;
+49;Teste;Teste.;"Simone Aparecida Joiozo Lima";simone@contec1996.com.br;Pessoal;"Leonardo Emanuel Manzini";Email;Baixa;"Em Andamento";2025-06-13;10:31:16;2025-06-13;13:13:24;;
+50;"Teste 2";"Teste 2.";"Simone Aparecida Joiozo Lima";simone@contec1996.com.br;Pessoal;"Leonardo Emanuel Manzini";"Adaptador de Video";Média;"Em Andamento";2025-06-13;11:09:30;2025-06-13;13:13:08;;
+51;"teste 3";"teste 3";"Simone Aparecida Joiozo Lima";simone@contec1996.com.br;Pessoal;"Leonardo Emanuel Manzini";Ar-Condicionado;Baixa;"Em Andamento";2025-06-13;13:16:30;2025-06-13;13:16:46;;
+52;"teste 4";"teste 4";"Simone Aparecida Joiozo Lima";simone@contec1996.com.br;Pessoal;"Leonardo Emanuel Manzini";Ar-Condicionado;Baixa;"Em Andamento";2025-06-13;13:36:41;2025-06-13;14:53:53;;

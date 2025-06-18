@@ -1,7 +1,7 @@
 <?php
 // abrir_chamado.php
 $titulo_pagina = "Abrir Novo Chamado";
-$css_pagina = "formularios.css"; // Continuamos usando o mesmo CSS
+$css_pagina = "formularios.css";
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
@@ -9,8 +9,6 @@ require_once 'includes/sidebar.php';
 $categorias = $conexao->query("SELECT id, nome FROM categorias ORDER BY nome ASC")->fetch_all(MYSQLI_ASSOC);
 $prioridades = $conexao->query("SELECT id, nome FROM prioridades ORDER BY id ASC")->fetch_all(MYSQLI_ASSOC);
 $agentes_ti = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE tipo_usuario = 'ti' AND ativo = 1 ORDER BY nome_completo ASC")->fetch_all(MYSQLI_ASSOC);
-
-// --- NOVO: Busca os 3 artigos mais populares ---
 $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE visivel_para = 'todos' ORDER BY visualizacoes DESC, votos_uteis DESC LIMIT 3")->fetch_all(MYSQLI_ASSOC);
 ?>
 
@@ -19,10 +17,8 @@ $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE vi
         <h1><?php echo $titulo_pagina; ?></h1>
     </div>
 
-    <!-- O content-body agora engloba tudo -->
     <div class="content-body">
         
-        <!-- Card Principal do Formulário -->
         <div class="form-card">
             <form id="form-abrir-chamado" action="processa_abertura_chamado.php" method="POST" enctype="multipart/form-data">
                 <div class="sugestoes-kb-wrapper">
@@ -80,7 +76,6 @@ $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE vi
             </form>
         </div>
 
-        <!-- Nova Seção de Ajuda -->
         <div class="ajuda-container">
             <div class="ajuda-card">
                 <h4><i class="fa-solid fa-lightbulb"></i> Dicas para um bom chamado</h4>
@@ -98,11 +93,7 @@ $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE vi
                 <?php else: ?>
                     <ul>
                         <?php foreach ($artigos_populares as $artigo): ?>
-                            <li>
-                                <a href="ver_artigo.php?id=<?php echo $artigo['id']; ?>" target="_blank">
-                                    <i class="fa-solid fa-book-open"></i> <?php echo htmlspecialchars($artigo['titulo']); ?>
-                                </a>
-                            </li>
+                            <li><a href="ver_artigo.php?id=<?php echo $artigo['id']; ?>" target="_blank"><i class="fa-solid fa-book-open"></i> <?php echo htmlspecialchars($artigo['titulo']); ?></a></li>
                         <?php endforeach; ?>
                     </ul>
                 <?php endif; ?>
@@ -112,7 +103,6 @@ $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE vi
     </div>
 </div>
 
-<!-- O HTML da sua animação continua aqui -->
 <div class="loading-overlay" id="loading-overlay">
     <div class="spinner"></div>
 </div>
@@ -125,99 +115,14 @@ $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE vi
     <p id="success-message"></p>
 </div>
 
-<?php $conexao->close(); ?>
+<?php
+if($conexao) {
+    $conexao->close();
+}
+?>
     </div> <!-- Fechamento da .dashboard-container -->
 </body>
 
-<!-- O JavaScript da sua animação e busca inteligente continua aqui -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    
-    const campoAssunto = document.getElementById('motivo_chamado');
-    const containerSugestoes = document.getElementById('sugestoes-kb');
-    let timeoutBusca = null;
-
-    if (campoAssunto) {
-        campoAssunto.addEventListener('keyup', function() {
-            clearTimeout(timeoutBusca);
-            const termo = this.value;
-
-            if (termo.length < 3) {
-                containerSugestoes.style.display = 'none';
-                containerSugestoes.innerHTML = '';
-                return;
-            }
-
-            timeoutBusca = setTimeout(() => {
-                fetch(`buscar_artigos.php?termo=${encodeURIComponent(termo)}`)
-                    .then(response => response.json())
-                    .then(artigos => {
-                        containerSugestoes.innerHTML = '';
-                        if (artigos.length > 0) {
-                            const header = document.createElement('div');
-                            header.className = 'sugestoes-header';
-                            header.innerHTML = '<span><i class="fa-solid fa-lightbulb"></i> Artigos Sugeridos</span>';
-                            containerSugestoes.appendChild(header);
-
-                            artigos.forEach(artigo => {
-                                const linkArtigo = document.createElement('a');
-                                linkArtigo.href = `ver_artigo.php?id=${artigo.id}`;
-                                linkArtigo.target = '_blank';
-                                linkArtigo.className = 'sugestao-item';
-                                linkArtigo.innerHTML = `<i class="fa-solid fa-book-open"></i> ${artigo.titulo}`;
-                                containerSugestoes.appendChild(linkArtigo);
-                            });
-                            containerSugestoes.style.display = 'block';
-                        } else {
-                            containerSugestoes.style.display = 'none';
-                        }
-                    })
-                    .catch(error => console.error('Erro na busca:', error));
-            }, 500);
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!containerSugestoes.contains(e.target)) {
-                containerSugestoes.style.display = 'none';
-            }
-        });
-    }
-
-    const form = document.getElementById('form-abrir-chamado');
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const successModal = document.getElementById('success-modal');
-    const successMessage = document.getElementById('success-message');
-
-    if (form) {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            loadingOverlay.style.display = 'flex';
-            const formData = new FormData(form);
-
-            fetch('processa_abertura_chamado.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                loadingOverlay.style.display = 'none';
-                if (data.success) {
-                    successMessage.textContent = 'Seu chamado nº ' + data.ticket_id + ' foi registrado.';
-                    successModal.style.display = 'flex';
-                    setTimeout(() => {
-                        window.location.href = 'painel.php';
-                    }, 3000);
-                } else {
-                    alert('Erro: ' + data.message);
-                }
-            })
-            .catch(error => {
-                loadingOverlay.style.display = 'none';
-                alert('Ocorreu um erro de comunicação. Tente novamente.');
-                console.error('Error:', error);
-            });
-        });
-    }
-});
-</script>
+<!-- << ALTERAÇÃO >> Carrega o novo ficheiro JavaScript dedicado -->
+<script src="js/abrir_chamado.js"></script>
 </html>

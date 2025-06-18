@@ -196,109 +196,17 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    
-    function escapeHTML(str) {
-        if (typeof str !== 'string') return '';
-        const p = document.createElement('p');
-        p.textContent = str;
-        return p.innerHTML;
-    }
-    
-    function flashElement(element) {
-        if (!element) return;
-        element.style.transition = 'background-color 0.2s';
-        element.style.backgroundColor = '#fffacd';
-        setTimeout(() => {
-            element.style.backgroundColor = '';
-        }, 1500);
-    }
-
-    function atualizarTabelaGerenciar(chamados) {
-        const tabelaCorpo = document.getElementById('tabela-gerenciar-corpo');
-        if (!tabelaCorpo) return;
-
-        let novoHtml = '';
-        if (chamados.length === 0) {
-            novoHtml = `<tr><td colspan="9" class="nenhum-chamado">Nenhum chamado encontrado com os filtros aplicados.</td></tr>`;
-        } else {
-            chamados.forEach(chamado => {
-                const statusClass = 'status-' + (chamado.nome_status ? chamado.nome_status.toLowerCase().replace(/ /g, '-') : 'indefinido');
-                const agente = chamado.nome_agente ? escapeHTML(chamado.nome_agente) : '<em>Não atribuído</em>';
-                const dataFormatada = new Date(chamado.data_ultima_atualizacao).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-                novoHtml += `
-                    <tr>
-                        <td>${escapeHTML(chamado.id)}</td>
-                        <td>${escapeHTML(chamado.motivo_chamado)}</td>
-                        <td>${escapeHTML(chamado.nome_solicitante)}</td>
-                        <td>${agente}</td>
-                        <td>${escapeHTML(chamado.nome_categoria)}</td>
-                        <td>${escapeHTML(chamado.nome_prioridade)}</td>
-                        <td><span class="status ${statusClass}">${escapeHTML(chamado.nome_status)}</span></td>
-                        <td>${dataFormatada}</td>
-                        <td><a href="detalhes_chamado.php?id=${chamado.id}" class="btn-acao">Ver Detalhes</a></td>
-                    </tr>
-                `;
-            });
-        }
-        
-        if (tabelaCorpo.innerHTML.replace(/\s/g, '') !== novoHtml.replace(/\s/g, '')) {
-            tabelaCorpo.innerHTML = novoHtml;
-            flashElement(tabelaCorpo.closest('.table-container'));
-        }
-    }
-    
-    function atualizarNotificacoes(contagem, listaNotificacoes) {
-        const contador = document.getElementById('contador-notificacoes');
-        const corpoDropdown = document.getElementById('notificacoes-body');
-        if (!contador || !corpoDropdown) return;
-        const contagemAtual = parseInt(contador.innerText) || 0;
-        if (contagem > 0) {
-            contador.innerText = contagem;
-            contador.style.display = 'inline-block';
-            if(contagem > contagemAtual) flashElement(contador);
-        } else {
-            contador.style.display = 'none';
-        }
-        let novoHtmlNotif = '';
-        if(listaNotificacoes.length === 0){
-             novoHtmlNotif = `<div class="notificacao-item"><div class="mensagem">Nenhuma notificação nova.</div></div>`;
-        } else {
-            listaNotificacoes.forEach(notif => {
-                const dataFormatada = new Date(notif.data_criacao).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-                novoHtmlNotif += `<a href="detalhes_chamado.php?id=${notif.id_ticket}" class="notificacao-item"><div class="icon"><i class="fa-solid fa-ticket"></i></div><div><div class="mensagem">${escapeHTML(notif.mensagem)}</div><div class="data">${dataFormatada}</div></div></a>`;
-            });
-        }
-        corpoDropdown.innerHTML = novoHtmlNotif;
-    }
-
-    async function verificarAtualizacoes() {
-        try {
-            const cacheBuster = new Date().getTime();
-            const urlFiltros = new URLSearchParams(window.location.search);
-            const url = `/chamados_contec/verificar_updates_geral.php?${urlFiltros.toString()}&t=${cacheBuster}`;
-            
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.error) { return; }
-            
-            if (data.chamados_gerenciados) {
-                atualizarTabelaGerenciar(data.chamados_gerenciados);
-            }
-            
-            if (typeof data.notificacoes_nao_lidas !== 'undefined' && data.lista_notificacoes) {
-                atualizarNotificacoes(data.notificacoes_nao_lidas, data.lista_notificacoes);
-            }
-
-        } catch (error) {
-            console.error("Erro na verificação:", error);
-        }
-    }
-    
-    if ("<?php echo $tipo_usuario; ?>" === 'ti') {
-        setInterval(verificarAtualizacoes, 5000);
-    }
+    // Uma forma simples de manter esta página atualizada:
+    // Quando uma notificação para o painel de TI chegar, recarregamos a página para refletir as mudanças.
+    // Uma implementação mais avançada poderia refazer a busca via AJAX.
+    document.addEventListener('ws:dashboard_new_ticket', function(event) {
+        console.log('Novo chamado recebido, atualizando a lista...');
+        location.reload(); 
+    });
+    document.addEventListener('ws:update_ticket_details', function(event) {
+        console.log('Status de chamado alterado, atualizando a lista...');
+        location.reload();
+    });
 });
 </script>
 
