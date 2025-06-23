@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
                 $stmt_nova_notif->close();
                 
-                enviar_notificacao_push($conexao, $destinatarios_ids, $id_chamado, $titulo_push, $corpo_push, 'comentario-' . $id_novo_comentario);
+                enviar_notificacao_push($conexao, $destinatarios_ids, $id_chamado, $titulo_push, $corpo_push, 'chamado-' . $id_chamado);
 
                 // ===== WEBSOCKET: ENVIAR ATUALIZAÇÕES EM TEMPO REAL (CORRIGIDO) =====
                 // 1. Enviar notificação para o sino de cada destinatário
