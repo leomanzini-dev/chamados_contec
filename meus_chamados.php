@@ -1,13 +1,14 @@
 <?php
 // meus_chamados.php
+
 $titulo_pagina = "Meus Chamados";
-$css_pagina = "tabelas.css"; // Usa o novo CSS para as tabelas
+$css_pagina = "tabelas.css"; // Continua carregando o seu CSS
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
-// Busca inicial de todos os chamados do colaborador
+// Busca os chamados do usuário logado no banco de dados
 $chamados = [];
-$sql = "SELECT t.id, t.motivo_chamado, t.data_criacao, c.nome AS nome_categoria, s.nome AS nome_status
+$sql = "SELECT t.id, t.id_chamado_usuario, t.motivo_chamado, t.data_criacao, c.nome AS nome_categoria, s.nome AS nome_status
         FROM tickets AS t
         JOIN categorias AS c ON t.id_categoria = c.id
         JOIN status_tickets AS s ON t.id_status = s.id
@@ -27,46 +28,25 @@ if ($stmt = $conexao->prepare($sql)) {
 
 <div class="main-content">
     <div class="main-header">
-        <h1><?php echo $titulo_pagina; ?></h1>
-        <div class="user-menu">
-            <div class="notificacao-sino">
-                <i class="fa-solid fa-bell"></i>
-                <span class="contador" id="contador-notificacoes" style="<?php echo (!isset($total_nao_lidas) || $total_nao_lidas == 0) ? 'display: none;' : ''; ?>"><?php echo $total_nao_lidas ?? 0; ?></span>
-                <div class="notificacoes-dropdown">
-                    <div class="notificacoes-header">Notificações</div>
-                    <div class="notificacoes-body" id="notificacoes-body">
-                        <?php if (empty($lista_notificacoes)): ?>
-                            <div class="notificacao-item"><div class="mensagem">Nenhuma notificação nova.</div></div>
-                        <?php else: ?>
-                            <?php foreach ($lista_notificacoes as $notif): ?>
-                                <a href="detalhes_chamado.php?id=<?php echo $notif['id_ticket']; ?>" class="notificacao-item">
-                                    <div class="icon"><i class="fa-solid fa-ticket"></i></div>
-                                    <div>
-                                        <div class="mensagem"><?php echo htmlspecialchars($notif['mensagem']); ?></div>
-                                        <div class="data"><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($notif['data_criacao']))); ?></div>
-                                    </div>
-                                </a>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                    <div class="notificacoes-footer"><a href="notificacoes.php">Ver todas as notificações</a></div>
-                </div>
-            </div>
-            <span>Olá, <?php echo htmlspecialchars($nome_usuario); ?>!</span>
-            <a href="logout.php" class="logout-link">Sair</a>
-        </div>
+        <h1><?php echo htmlspecialchars($titulo_pagina); ?></h1>
+
+        <a href="abrir_chamado.php" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Abrir Novo Chamado
+        </a>
     </div>
 
     <div class="content-body">
         <div class="table-container">
+            <h2 style="margin: 0 0 20px 10px;">Seu Histórico de Chamados</h2>
+            
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Nº Chamado</th>
+                        <th>Nº do Seu Chamado</th>
                         <th>Assunto</th>
                         <th>Categoria</th>
-                        <th>Status</th>
                         <th>Data de Abertura</th>
+                        <th>Status</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -78,17 +58,17 @@ if ($stmt = $conexao->prepare($sql)) {
                     <?php else: ?>
                         <?php foreach ($chamados as $chamado): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($chamado['id']); ?></td>
+                                <td>#<?php echo htmlspecialchars($chamado['id_chamado_usuario'] ?? $chamado['id']); ?></td>
                                 <td><?php echo htmlspecialchars($chamado['motivo_chamado']); ?></td>
                                 <td><?php echo htmlspecialchars($chamado['nome_categoria']); ?></td>
+                                <td><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($chamado['data_criacao']))); ?></td>
                                 <td>
                                     <span class="status status-<?php echo strtolower(str_replace(' ', '-', $chamado['nome_status'])); ?>">
                                         <?php echo htmlspecialchars($chamado['nome_status']); ?>
                                     </span>
                                 </td>
-                                <td><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($chamado['data_criacao']))); ?></td>
                                 <td>
-                                    <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn-acao">Ver Detalhes</a>
+                                    <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn btn-acao">Ver Detalhes</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -105,5 +85,6 @@ if ($conexao) {
 }
 ?>
 
+</div>
 </body>
 </html>

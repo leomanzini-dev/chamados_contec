@@ -1,167 +1,152 @@
-/* css/detalhes_chamado.css - Versão Refinada */
+/* ======================================================== */
+/* ESTILO FINAL E CRIATIVO PARA A PÁGINA DETALHES_CHAMADO   */
+/* ======================================================== */
 
-/* O layout principal da página agora vem do dashboard.css */
-
-.detalhes-grid {
+/* 1. O Layout Principal de Duas Colunas */
+.ticket-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); /* Coluna principal mais larga */
+    gap: 35px;
+    align-items: start;
+}
+
+/* 2. Coluna Principal (Esquerda) - O "Feed" */
+.ticket-main-content {
+    display: flex;
+    flex-direction: column;
     gap: 30px;
+}
+.ticket-main-content h2 { /* Título do chamado */
+    font-size: 2rem;
+    color: #1e293b;
+    margin-top: 0;
+    margin-bottom: 5px;
+    line-height: 1.2;
+}
+.ticket-main-content .info-chamado-meta { /* Linha com Solicitante, Agente, etc. */
+    color: #64748b;
+    font-size: 0.9rem;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eef2f7;
     margin-bottom: 25px;
-    padding-bottom: 25px;
-    border-bottom: 1px solid var(--cor-borda);
 }
-
-.info-chamado h2 {
-    margin-top: 0;
-    color: var(--cor-texto-principal);
-    font-size: 1.6em;
+.ticket-main-content .info-chamado-meta p {
+    margin: 4px 0;
 }
-
-.info-chamado p {
-    margin: 5px 0 10px 0;
-    color: var(--cor-texto-secundario);
-}
-
-.info-chamado p strong {
-    color: var(--cor-texto-principal);
-}
-
-.status-chamado {
-    background-color: #f9fafb;
-    padding: 20px;
-    border-radius: var(--raio-borda);
-    border: 1px solid var(--cor-borda);
-}
-
-.status-chamado .info-item span {
-    font-size: 0.9em;
-    font-weight: 600;
-    color: var(--cor-texto-secundario);
-    display: block;
-    margin-bottom: 4px;
-}
-
-.status-chamado .info-item p {
-    margin-top: 0;
-    font-size: 1.1em;
-    font-weight: 500;
-}
-
-/* Reutilizando as pílulas de status do tabelas.css */
-.status-chamado .status {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.8em;
-}
-
-/* Seções de Descrição, Anexos, Histórico */
-.descricao-completa, .anexos-chamado, .historico-chamado, .novo-comentario, .gerenciamento-ti {
-    margin-bottom: 35px;
-}
-
-.content-body h3 {
+/* Títulos das seções (Descrição, Histórico, etc.) */
+.ticket-main-content h3 {
     font-size: 1.3rem;
-    color: var(--cor-secundaria);
-    border-bottom: 2px solid var(--cor-borda);
-    padding-bottom: 8px;
-    margin-bottom: 20px;
-}
-
-.descricao-completa p {
-    line-height: 1.7;
-    white-space: pre-wrap;
-}
-
-.anexos-chamado ul {
-    list-style: none;
-    padding: 0;
-}
-.anexos-chamado li { margin-bottom: 5px; }
-
-/* Histórico de Comentários */
-.comentario {
-    border: 1px solid var(--cor-borda);
-    border-radius: var(--raio-borda);
+    color: #334155;
+    margin-top: 0; /* Removido o espaço extra */
     margin-bottom: 15px;
-    overflow: hidden;
-}
-.comentario-header {
-    background-color: #f9fafb;
-    padding: 12px 15px;
-    border-bottom: 1px solid var(--cor-borda);
-    font-size: 0.9em;
-    color: var(--cor-texto-secundario);
-}
-.comentario.interno .comentario-header {
-    background-color: #fffbe6;
-    border-color: #ffe58f;
-    color: #856404;
-}
-.tag-interno {
-    background-color: var(--cor-aviso);
-    color: #333;
-    padding: 3px 8px;
-    border-radius: 5px;
-    font-size: 0.75em;
-    font-weight: bold;
-    margin-left: 10px;
-}
-.comentario-corpo {
-    padding: 15px;
-    line-height: 1.6;
 }
 
-/* Formulário de novo comentário */
-.novo-comentario textarea {
-    margin-bottom: 10px;
-    min-height: 120px;
+/* 3. Coluna Lateral (Direita) - Os Cards de Informação */
+.ticket-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    position: sticky; /* Faz a barra lateral "flutuar" ao rolar a página */
+    top: 20px;
 }
-.checkbox-interno {
-    margin-bottom: 15px;
-    font-size: 0.9em;
+
+/* Estilo padrão para os cards da lateral */
+.sidebar-card {
+    background-color: #ffffff;
+    border: 1px solid #eef2f7;
+    border-radius: 8px;
+}
+.sidebar-card h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #475569;
+    padding: 15px 20px;
+    margin: 0;
+    border-bottom: 1px solid #eef2f7;
     display: flex;
     align-items: center;
 }
-.checkbox-interno input {
-    width: auto;
-    margin-right: 8px;
+.sidebar-card .card-content {
+    padding: 20px;
 }
 
-/* Bloco de Gerenciamento TI (AJUSTADO) */
-.gerenciamento-ti {
-    background-color: #fffbe6; /* Amarelo claro para destaque */
-    border: 1px solid #ffe58f;
-    border-radius: var(--raio-borda);
-    padding: 20px 25px;
+/* ======================================================== */
+/* ===== INÍCIO DAS ALTERAÇÕES CRIATIVAS NOS DETALHES ===== */
+/* ======================================================== */
+
+/* Estilizando a lista de detalhes (Status, Prioridade...) */
+.ticket-details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaço entre os itens */
+}
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #dbeafe; /* Linha tracejada sutil */
+}
+.detail-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.detail-item span { /* Label: "Status", "Prioridade"... */
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+}
+.detail-item p { /* Valor: "Em Andamento", "Média"... */
+    font-size: 1.1rem; /* Fonte maior para o valor */
+    font-weight: 600;  /* Mais forte */
+    color: #1e293b;
+    margin: 0;
 }
 
-.gerenciamento-ti .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px; /* Aumenta o espaço antes do botão */
-}
+/* Ícones para os labels de detalhes */
+.detail-item span.label-status::before { content: '\f024'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; color: #6b7280; }
+.detail-item span.label-prioridade::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; color: #f59e0b; }
+.detail-item span.label-categoria::before { content: '\f02c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; color: #3b82f6; }
 
-.gerenciamento-ti .form-group {
-    margin-bottom: 0;
-}
 
-.gerenciamento-ti .form-group label {
+/* Pílula de status */
+.detail-item p.status { 
+    display: inline-block; 
+    width: fit-content; 
+    color: white; 
+    padding: 6px 14px; 
+    border-radius: 20px; 
+    font-size: 0.9rem; 
     font-weight: 600;
 }
+.status-aberto { background-color: #3b82f6; }
+.status-em-andamento { background-color: #f59e0b; }
+.status-aguardando-solicitante { background-color: #6b7280; }
+.status-pausado { background-color: #6366f1; }
+.status-resolvido { background-color: #22c55e; }
+.status-cancelado { background-color: #ef4444; }
 
-/* Ajuste para o container do botão */
-.gerenciamento-ti .form-group.action-button {
-    text-align: right; /* Alinha o botão à direita */
-}
 
-.gerenciamento-ti .btn-atualizar {
-    width: auto; /* Faz o botão ter a largura do texto */
-    background-color: var(--cor-aviso);
-    color: #333;
-    font-weight: 600;
-}
-.gerenciamento-ti .btn-atualizar:hover {
-    background-color: #ffca2c;
-    opacity: 1;
-}
+/* Bloco de Anexos (Mantido o estilo de card com ícones) */
+.anexos-chamado { border-left: 4px solid #3c7275; }
+.anexos-chamado h3::before { content: '\f0c6'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 10px; }
+.anexos-chamado ul { list-style: none; padding: 0; margin: 0; }
+.anexos-chamado li { margin-bottom: 8px; }
+.anexos-chamado li:last-child { margin-bottom: 0; }
+.anexos-chamado a { color: #0d6efd; text-decoration: none; font-weight: 500; }
+.anexos-chamado a:hover { text-decoration: underline; }
+.anexos-chamado a::before { content: '\f019'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; }
+.tamanho-anexo { margin-left: 8px; font-size: 0.85em; color: #64748b; }
+
+/* Bloco de Gerenciamento de TI */
+.gerenciamento-ti .form-group { margin-bottom: 15px; }
+.gerenciamento-ti .btn-atualizar { width: 100%; }
+
+/* Histórico e Comentários (sem a caixa externa) */
+.historico-chamado .comentario { border: 1px solid #eef2f7; border-radius: 8px; margin-bottom: 15px; background-color: #ffffff; }
+.historico-chamado .comentario-header { background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #eef2f7; font-size: 0.9em; }
+.historico-chamado .comentario-corpo { padding: 15px; line-height: 1.6; }

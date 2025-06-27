@@ -1,67 +1,54 @@
 /* css/global.css */
 
-/* 1. Importação da Fonte do Google Fonts (usaremos 'Inter', que é moderna e legível) */
+/* 1. Importação da Fonte e Variáveis de Cor (Mantido) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* 2. Definição das Variáveis de Cor (usando sua paleta) */
 :root {
-    --cor-principal: #3C6E71;       /* Verde Contec */
-    --cor-secundaria: #284B63;     /* Azul Escuro */
-    --cor-fundo: #f8f9fa;           /* Um cinza muito claro, mais suave que o #f4f4f4 */
-    --cor-superficie: #FFFFFF;     /* Branco para cards, containers */
-    --cor-texto-principal: #343a40; /* Cinza escuro para textos, melhor que preto puro */
-    --cor-texto-secundario: #6c757d;/* Cinza mais claro para subtextos */
-    --cor-borda: #dee2e6;           /* Cinza para bordas suaves */
-    
-    /* Cores de feedback */
+    --cor-principal: #3C6E71;
+    --cor-secundaria: #284B63;
+    --cor-fundo: #f8f9fa;
+    --cor-superficie: #FFFFFF;
+    --cor-texto-principal: #343a40;
+    --cor-texto-secundario: #6c757d;
+    --cor-borda: #dee2e6;
     --cor-sucesso: #198754;
     --cor-erro: #dc3545;
     --cor-aviso: #ffc107;
-
-    /* Estilos de interface */
     --sombra-suave: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --raio-borda: 8px; /* Borda arredondada padrão */
+    --raio-borda: 8px;
     --transicao-rapida: all 0.2s ease-in-out;
 }
 
-/* 3. Reset e Estilos de Base Globais */
+/* 2. Reset e Estilos de Base (Mantido) */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
-
 body {
-    font-family: 'Inter', sans-serif; /* Aplicando a nova fonte */
+    font-family: 'Inter', sans-serif;
     background-color: var(--cor-fundo);
     color: var(--cor-texto-principal);
     line-height: 1.6;
     font-size: 16px;
 }
-
 h1, h2, h3, h4, h5, h6 {
-    font-weight: 600; /* Deixa os títulos um pouco mais fortes */
+    font-weight: 600;
     color: var(--cor-secundaria);
     margin-bottom: 0.75rem;
 }
-
 a {
     color: var(--cor-principal);
     text-decoration: none;
     transition: var(--transicao-rapida);
 }
-
 a:hover {
     text-decoration: underline;
     opacity: 0.8;
 }
 
-/* Estilos de base para formulários */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-select,
-textarea {
+/* Estilos de base para formulários (Mantido) */
+input[type="text"], input[type="email"], input[type="password"], select, textarea {
     width: 100%;
     padding: 12px;
     border: 1px solid var(--cor-borda);
@@ -70,31 +57,137 @@ textarea {
     font-size: 1rem;
     transition: var(--transicao-rapida);
 }
-
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--cor-principal);
     box-shadow: 0 0 0 3px rgba(60, 110, 113, 0.2);
 }
 
-/* Estilo de base para botões */
-button, input[type="submit"] {
-    display: inline-block;
-    padding: 12px 24px;
-    border: none;
-    border-radius: var(--raio-borda);
-    background-color: var(--cor-principal);
-    color: white;
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
+/* ======================================================== */
+/* SISTEMA DE BOTÕES UNIFICADO E SIMPLIFICADO               */
+/* ======================================================== */
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
     font-weight: 600;
+    text-decoration: none;
     cursor: pointer;
-    text-align: center;
-    transition: var(--transicao-rapida);
+    border: 2px solid transparent;
+    transition: all 0.2s ease-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn i {
+    margin-right: 8px;
+    transition: transform 0.3s ease-in-out;
+}
+.btn:hover {
+    text-decoration: none !important;
 }
 
-button:hover, input[type="submit"]:hover {
-    opacity: 0.85;
-    transform: translateY(-2px); /* Efeito sutil de elevação */
-    box-shadow: var(--sombra-suave);
+.btn-primary {
+    background-color: var(--cor-principal);
+    color: white;
+    border-color: var(--cor-principal);
+    box-shadow: 0 3px 6px rgba(60, 114, 117, 0.25);
+}
+.btn-primary:hover {
+    background-color: var(--cor-secundaria);
+    border-color: var(--cor-secundaria);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(60, 114, 117, 0.35);
+}
+.btn-primary:hover i {
+    transform: scale(1.1) rotate(180deg);
+}
+
+.btn-secondary {
+    background-color: var(--cor-superficie);
+    color: var(--cor-texto-secundario);
+    border-color: var(--cor-borda);
+}
+.btn-secondary:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+    color: var(--cor-texto-principal);
+}
+
+.btn-acao {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    background-color: #f8fafc;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+.btn-acao:hover {
+    border-color: #cbd5e1;
+    background-color: #ffffff;
+    color: #1e293b;
+}
+
+/* ================================================ */
+/* ESTILO CRIATIVO PARA NOTIFICAÇÕES TOAST (NOVO)   */
+/* ================================================ */
+
+#toast-container {
+    position: fixed;
+    top: 80px; /* Um pouco mais para baixo para não colar no topo */
+    right: 20px;
+    z-index: 2000; /* Z-index alto para ficar sobre tudo */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.toast {
+    background-color: var(--cor-superficie);
+    padding: 16px 20px;
+    border-radius: var(--raio-borda);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 320px;
+    max-width: 350px;
+    border-left: 5px solid; /* Borda colorida */
+    
+    /* Animação */
+    opacity: 0;
+    transform: translateX(20px);
+    animation: toastSlideIn 0.5s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+.toast.sucesso { border-left-color: var(--cor-sucesso); }
+.toast.erro { border-left-color: var(--cor-erro); }
+.toast.aviso { border-left-color: var(--cor-aviso); }
+
+.toast i {
+    font-size: 1.8rem;
+    margin: 0;
+}
+.toast.sucesso i { color: var(--cor-sucesso); }
+.toast.erro i { color: var(--cor-erro); }
+.toast.aviso i { color: var(--cor-aviso); }
+
+.toast .mensagem-toast {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--cor-texto-principal);
+}
+
+@keyframes toastSlideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastFadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(20px);
+    }
 }

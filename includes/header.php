@@ -50,15 +50,16 @@ if (isset($conexao)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/dashboard.css">
-    <?php if (isset($css_pagina)): ?>
-        <link rel="stylesheet" href="css/<?php echo $css_pagina; ?>">
+<link rel="stylesheet" href="css/global.css?v=<?php echo filemtime('css/global.css'); ?>">
+    <link rel="stylesheet" href="css/dashboard.css?v=<?php echo filemtime('css/dashboard.css'); ?>">
+    <?php if (isset($css_pagina) && file_exists('css/' . $css_pagina)): ?>
+        <link rel="stylesheet" href="css/<?php echo $css_pagina; ?>?v=<?php echo filemtime('css/' . $css_pagina); ?>">
     <?php endif; ?>
-    <script src="js/dashboard.js" defer></script>
-    <script src="js/push_manager.js" defer></script>
 
-    <script src="js/websocket_client.js" defer></script>
+    <script src="js/dashboard.js?v=<?php echo filemtime('js/dashboard.js'); ?>" defer></script>
+    <script src="js/push_manager.js?v=<?php echo filemtime('js/push_manager.js'); ?>" defer></script>
+    <script src="js/websocket_client.js?v=<?php echo filemtime('js/websocket_client.js'); ?>" defer></script>
+    <script src="js/notificacoes.js?v=<?php echo filemtime('js/notificacoes.js'); ?>"></script>
 
 </head>
 <body data-usuario-id="<?php echo htmlspecialchars($id_usuario_logado); ?>"

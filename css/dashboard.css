@@ -579,3 +579,9 @@ body.sidebar-collapsed .site-title-main,
 body.sidebar-collapsed .site-title-sub {
     display: none;
 }
+
+.card-relatorio .chart-container {
+    position: relative; /* Necessário para o Chart.js funcionar bem */
+    min-height: 400px;  /* Ajuste este valor se quiser maior ou menor */
+    height: 100%;
+}

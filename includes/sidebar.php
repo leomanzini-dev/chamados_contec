@@ -22,7 +22,6 @@
                 <li class="<?php echo ($pagina_atual == 'meus_chamados.php') ? 'active' : ''; ?>">
                     <a href="meus_chamados.php" title="Meus Chamados"><i class="fa-solid fa-ticket"></i><span class="link-text">Meus Chamados</span></a>
                 </li>
-                <!-- Link da Base de Conhecimento para Colaboradores -->
                 <li class="<?php echo ($pagina_atual == 'kb.php') ? 'active' : ''; ?>">
                     <a href="kb.php" title="Base de Conhecimento"><i class="fa-solid fa-book-open"></i><span class="link-text">Base de Conhecimento</span></a>
                 </li>
@@ -46,7 +45,6 @@
         </ul>
     </nav>
 
-    <!-- Botão de Toggle no final da sidebar -->
     <div class="sidebar-toggle-wrapper">
         <button id="sidebar-toggle" title="Encolher menu">
             <i class="fa-solid fa-chevron-left"></i>
@@ -54,6 +52,7 @@
     </div>
 </aside>
 <script>
-  window.vapidPublicKey = '<?php echo VAPID_PUBLIC_KEY; ?>';
+    window.vapidPublicKey = '<?php echo VAPID_PUBLIC_KEY; ?>';
 </script>
 
+<div id="toast-container"></div>

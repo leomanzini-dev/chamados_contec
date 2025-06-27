@@ -70,8 +70,8 @@ $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE vi
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-submit">Abrir Chamado</button>
-                    <a href="painel.php" class="btn-cancelar">Cancelar</a>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Abrir Chamado</button>
+                    <a href="painel.php" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
         </div>
@@ -120,9 +120,7 @@ if($conexao) {
     $conexao->close();
 }
 ?>
-    </div> <!-- Fechamento da .dashboard-container -->
-</body>
+    </div> </body>
 
-<!-- << ALTERAÇÃO >> Carrega o novo ficheiro JavaScript dedicado -->
 <script src="js/abrir_chamado.js"></script>
 </html>

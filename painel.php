@@ -1,5 +1,5 @@
 <?php
-// painel.php - VERSÃO FINAL E UNIFICADA COM WEBSOCKET
+// painel.php - VERSÃO FINAL COM TODAS AS CORREÇÕES E FUNCIONALIDADES
 
 $titulo_pagina = "Painel Principal";
 require_once 'includes/header.php';
@@ -40,9 +40,15 @@ if ($tipo_usuario == 'ti') {
     $sql_stats_colab = "SELECT (SELECT COUNT(id) FROM tickets WHERE id_solicitante = ? AND id_status NOT IN (5, 6)) AS meus_abertos, (SELECT COUNT(id) FROM tickets WHERE id_solicitante = ? AND id_status = 5) AS meus_resolvidos FROM DUAL";
     $stmt_stats = $conexao->prepare($sql_stats_colab);
     if ($stmt_stats) { $stmt_stats->bind_param("ii", $id_usuario_logado, $id_usuario_logado); $stmt_stats->execute(); $stats = $stmt_stats->get_result()->fetch_assoc(); $stmt_stats->close(); }
-    $sql_ultimos_colab = "SELECT t.id, t.motivo_chamado, s.nome as nome_status FROM tickets t JOIN status_tickets s ON t.id_status = s.id WHERE t.id_solicitante = ? ORDER BY t.data_ultima_atualizacao DESC LIMIT 5";
+    
+    $sql_ultimos_colab = "SELECT t.id, t.id_chamado_usuario, t.motivo_chamado, s.nome as nome_status 
+                          FROM tickets t 
+                          JOIN status_tickets s ON t.id_status = s.id 
+                          WHERE t.id_solicitante = ? 
+                          ORDER BY t.data_ultima_atualizacao DESC LIMIT 5";
     $stmt_chamados = $conexao->prepare($sql_ultimos_colab);
     if ($stmt_chamados) { $stmt_chamados->bind_param("i", $id_usuario_logado); $stmt_chamados->execute(); $ultimos_chamados = $stmt_chamados->get_result()->fetch_all(MYSQLI_ASSOC); $stmt_chamados->close(); }
+    
     $sql_kb = "SELECT id, titulo FROM kb_artigos WHERE visivel_para = 'todos' ORDER BY visualizacoes DESC, votos_uteis DESC LIMIT 3";
     $artigos_populares = $conexao->query($sql_kb)->fetch_all(MYSQLI_ASSOC);
 }
@@ -82,10 +88,24 @@ if ($tipo_usuario == 'ti') {
 
     <div class="content-body">
         <?php
-        if (isset($_SESSION['mensagem_erro'])) { echo '<div class="alerta erro">' . htmlspecialchars($_SESSION['mensagem_erro']) . '</div>'; unset($_SESSION['mensagem_erro']); }
-        if (isset($_SESSION['mensagem_aviso'])) { echo '<div class="alerta aviso">' . htmlspecialchars($_SESSION['mensagem_aviso']) . '</div>'; unset($_SESSION['mensagem_aviso']); }
-        if (isset($_SESSION['mensagem_sucesso'])) { echo '<div class="alerta sucesso">' . htmlspecialchars($_SESSION['mensagem_sucesso']) . '</div>'; unset($_SESSION['mensagem_sucesso']); }
+        // ===== ALTERAÇÃO PARA CHAMAR O JAVASCRIPT DO TOAST =====
+        if (isset($_SESSION['mensagem_sucesso'])) {
+            $mensagem_js = addslashes(htmlspecialchars($_SESSION['mensagem_sucesso']));
+            echo "<script>showToast('{$mensagem_js}', 'sucesso');</script>";
+            unset($_SESSION['mensagem_sucesso']);
+        }
+        if (isset($_SESSION['mensagem_erro'])) {
+            $mensagem_js = addslashes(htmlspecialchars($_SESSION['mensagem_erro']));
+            echo "<script>showToast('{$mensagem_js}', 'erro');</script>";
+            unset($_SESSION['mensagem_erro']);
+        }
+        if (isset($_SESSION['mensagem_aviso'])) {
+            $mensagem_js = addslashes(htmlspecialchars($_SESSION['mensagem_aviso']));
+            echo "<script>showToast('{$mensagem_js}', 'aviso');</script>";
+            unset($_SESSION['mensagem_aviso']);
+        }
         ?>
+
         <div class="dashboard-grid">
             <?php if ($tipo_usuario == 'ti'): ?>
                 <div class="stat-card abertos"><div class="icon"><i class="fa-solid fa-folder-open"></i></div><div class="info"><span class="number" id="stat-abertos"><?php echo $stats['abertos'] ?? 0; ?></span><span class="label">Chamados Abertos</span></div></div>
@@ -131,7 +151,16 @@ if ($tipo_usuario == 'ti') {
                             <li class="nenhum-chamado"><p>Nenhuma atividade recente em seus chamados.</p></li>
                         <?php else: ?>
                             <?php foreach ($ultimos_chamados as $chamado): ?>
-                            <li><div class="chamado-info"><a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>">Chamado #<?php echo $chamado['id']; ?>: <?php echo htmlspecialchars($chamado['motivo_chamado']); ?></a></div><span class="status status-<?php echo strtolower(str_replace(' ', '-', $chamado['nome_status'])); ?>"><?php echo htmlspecialchars($chamado['nome_status']); ?></span></li>
+                                <li>
+                                    <div class="chamado-info">
+                                        <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>">
+                                            Chamado #<?php echo htmlspecialchars($chamado['id_chamado_usuario'] ?? $chamado['id']); ?>: <?php echo htmlspecialchars($chamado['motivo_chamado']); ?>
+                                        </a>
+                                    </div>
+                                    <span class="status status-<?php echo strtolower(str_replace(' ', '-', $chamado['nome_status'])); ?>">
+                                        <?php echo htmlspecialchars($chamado['nome_status']); ?>
+                                    </span>
+                                </li>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </ul>
@@ -161,27 +190,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const tipoUsuario = "<?php echo $tipo_usuario; ?>";
     
-    // =======================================================
-    // OUVINTES DE EVENTOS WEBSOCKET
-    // =======================================================
-
+    // Ouve pelo sinal genérico para atualizar o painel
     document.addEventListener('ws:refresh_dashboard', function(event) {
-        console.log("Sinal 'refresh_dashboard' recebido! Verificando todas as atualizações...");
+        console.log("Sinal 'refresh_dashboard' recebido! Verificando atualizações...");
         verificarAtualizacoes();
     });
-    
-    document.addEventListener('ws:global_notification', function(event) {
-        console.log("Sinal 'global_notification' recebido com dados para o sino!");
-        const payload = event.detail;
-        if (typeof atualizarNotificacoes === 'function' && payload) {
-            atualizarNotificacoes(payload.unread_count, payload.notifications_list);
-        }
-    });
 
-    // =================================================================
-    // FUNÇÃO DE BUSCA E FUNÇÕES DE ATUALIZAÇÃO DA INTERFACE
-    // =================================================================
-    let ultimoId = 0;
+    let ultimoId = 0; // Usado apenas por TI para buscar somente os mais novos
 
     if (tipoUsuario === 'ti') {
         const itensIniciais = document.querySelectorAll('#lista-novos-chamados li[id^="chamado-item-"]');
@@ -193,23 +208,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function verificarAtualizacoes() {
         try {
+            // Este endpoint busca todos os dados necessários para o painel de uma vez
             const url = `/chamados_contec/verificar_updates.php?ultimo_id=${ultimoId}&tipo=${tipoUsuario}`;
+            
             const response = await fetch(url);
-            if (!response.ok) return;
+            if (!response.ok) { return; }
             const data = await response.json();
 
             if (data.error) { return; }
             
-            // Roteamento dos dados para as funções de UI
+            // Roteia os dados recebidos para as funções que atualizam a tela
             if (tipoUsuario === 'ti') {
                 if (data.novos_chamados && data.novos_chamados.length > 0) adicionarChamadosNaLista(data.novos_chamados);
                 if (data.estatisticas) atualizarEstatisticasTI(data.estatisticas);
-                if (data.meus_chamados_ativos) atualizarMeusChamadosTI(data.meus_chamados_ativos); // A chamada que estava falhando
-            } else {
+                if (data.meus_chamados_ativos) atualizarMeusChamadosTI(data.meus_chamados_ativos);
+            } else { // Colaborador
                 if (data.estatisticas) atualizarEstatisticasColaborador(data.estatisticas);
                 if (data.ultimos_chamados) atualizarUltimosChamados(data.ultimos_chamados);
             }
             
+            // O sino de notificação é atualizado para ambos os tipos de usuário
             if (typeof data.notificacoes_nao_lidas !== 'undefined' && data.lista_notificacoes) {
                 atualizarNotificacoes(data.notificacoes_nao_lidas, data.lista_notificacoes);
             }
@@ -218,23 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ===========================================================
-    // FUNÇÕES DE UI (AQUI ESTÁ A FUNÇÃO QUE FALTAVA)
-    // ===========================================================
-
-    function escapeHTML(str) {
-        if (typeof str !== 'string') return '';
-        const p = document.createElement('p');
-        p.textContent = str;
-        return p.innerHTML;
-    }
-    
-    function flashElement(element) {
-        if (!element) return;
-        element.style.transition = 'background-color 0.2s';
-        element.style.backgroundColor = '#fffacd';
-        setTimeout(() => { element.style.backgroundColor = ''; }, 1500);
-    }
+    // ===== FUNÇÕES DE ATUALIZAÇÃO DA INTERFACE (COMPLETAS) =====
 
     function adicionarChamadosNaLista(chamados) {
         const listaNovosChamados = document.getElementById('lista-novos-chamados');
@@ -243,11 +245,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (document.getElementById(`chamado-item-${chamado.id}`)) return;
             const itemNenhumChamado = listaNovosChamados.querySelector('.nenhum-chamado');
             if (itemNenhumChamado) itemNenhumChamado.parentElement.remove();
-            
             const novoItem = document.createElement('li');
             novoItem.id = `chamado-item-${chamado.id}`;
             novoItem.innerHTML = `<div class="chamado-info"><a href="detalhes_chamado.php?id=${chamado.id}">Chamado #${chamado.id}: ${escapeHTML(chamado.motivo_chamado)}</a><div class="sub-info">Solicitado por: ${escapeHTML(chamado.nome_solicitante)}</div></div><a href="atender_chamado.php?id=${chamado.id}" class="btn-acao-sm">Atender</a>`;
-            
             listaNovosChamados.prepend(novoItem);
             flashElement(novoItem);
             if (chamado.id > ultimoId) ultimoId = chamado.id;
@@ -271,8 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
             flashElement(elResolvidos.closest('.stat-card'));
         }
     }
-    
-    // ===== A FUNÇÃO QUE ESTAVA FALTANDO =====
+
     function atualizarMeusChamadosTI(chamados) {
         const lista = document.getElementById('lista-meus-chamados');
         if (!lista) return;
@@ -285,30 +284,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 novoHtml += `<li><div class="chamado-info"><a href="detalhes_chamado.php?id=${chamado.id}">Chamado #${chamado.id}: ${escapeHTML(chamado.motivo_chamado)}</a></div><span class="status ${statusClass}">${escapeHTML(chamado.nome_status)}</span></li>`;
             });
         }
-        // Apenas atualiza o HTML se ele realmente mudou, para evitar "piscadas" desnecessárias
         if (lista.innerHTML.replace(/\s/g, '') !== novoHtml.replace(/\s/g, '')) {
             lista.innerHTML = novoHtml;
             flashElement(lista.closest('.recentes-card'));
         }
     }
     
-    // Funções de atualização do colaborador
-    function atualizarEstatisticasColaborador(estatisticas) { /* ...código... */ }
-    function atualizarUltimosChamados(chamados) { /* ...código... */ }
+    function atualizarEstatisticasColaborador(estatisticas) {
+        const elAbertos = document.getElementById('stat-colab-abertos');
+        const elResolvidos = document.getElementById('stat-colab-resolvidos');
+        if (elAbertos && typeof estatisticas.meus_abertos !== 'undefined' && elAbertos.innerText != estatisticas.meus_abertos) {
+            elAbertos.innerText = estatisticas.meus_abertos;
+            flashElement(elAbertos.closest('.stat-card'));
+        }
+        if (elResolvidos && typeof estatisticas.meus_resolvidos !== 'undefined' && elResolvidos.innerText != estatisticas.meus_resolvidos) {
+            elResolvidos.innerText = estatisticas.meus_resolvidos;
+            flashElement(elResolvidos.closest('.stat-card'));
+        }
+    }
 
-    // Função de atualização do sino de notificações
+    function atualizarUltimosChamados(chamados) {
+        const lista = document.getElementById('lista-ultimos-chamados');
+        if (!lista) return;
+        let novoHtml = '';
+        if (chamados.length === 0) {
+            novoHtml = `<li class="nenhum-chamado"><p>Nenhuma atividade recente em seus chamados.</p></li>`;
+        } else {
+            chamados.forEach(chamado => {
+                const statusClass = 'status-' + chamado.nome_status.toLowerCase().replace(/ /g, '-');
+                novoHtml += `<li><div class="chamado-info"><a href="detalhes_chamado.php?id=${chamado.id}">Chamado #${escapeHTML(chamado.id_chamado_usuario ?? chamado.id)}: ${escapeHTML(chamado.motivo_chamado)}</a></div><span class="status ${statusClass}">${escapeHTML(chamado.nome_status)}</span></li>`;
+            });
+        }
+        if (lista.innerHTML.replace(/\s/g, '') !== novoHtml.replace(/\s/g, '')) {
+            lista.innerHTML = novoHtml;
+            flashElement(lista.closest('.recentes-card'));
+        }
+    }
+    
     function atualizarNotificacoes(contagem, listaNotificacoes) {
         const contador = document.getElementById('contador-notificacoes');
         const corpoDropdown = document.getElementById('notificacoes-body');
         if (!contador || !corpoDropdown) return;
-        
         const contagemAtual = parseInt(contador.textContent) || 0;
         if (contagem > 0) {
             contador.innerText = contagem;
             contador.style.display = 'inline-block';
-            if (contagem > contagemAtual) {
-                flashElement(contador);
-            }
+            if (contagem > contagemAtual) flashElement(contador);
         } else {
             contador.style.display = 'none';
         }
@@ -322,6 +343,20 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         corpoDropdown.innerHTML = novoHtml;
+    }
+    
+    function flashElement(element) {
+        if (!element) return;
+        element.style.transition = 'background-color 0.2s';
+        element.style.backgroundColor = '#fffacd';
+        setTimeout(() => { element.style.backgroundColor = ''; }, 1500);
+    }
+    
+    function escapeHTML(str) {
+        if (typeof str !== 'string') return '';
+        const p = document.createElement('p');
+        p.textContent = str;
+        return p.innerHTML;
     }
 });
 </script>

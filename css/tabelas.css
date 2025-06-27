@@ -122,3 +122,49 @@
 .status-pausado { background-color: #6366f1; }
 .status-resolvido { background-color: #22c55e; }
 .status-cancelado { background-color: #ef4444; }
+
+/* ================================================================= */
+/* Estilo Criativo "Ghost Button" para o Botão "Abrir Novo Chamado" */
+/* ================================================================= */
+
+.table-container .btn-primary {
+    /* --- Cor e Fundo --- */
+    background-color: transparent; /* Fundo transparente, o "fantasma" */
+    color: #3c7275; /* Cor do texto e do ícone, um verde-azulado do seu painel */
+    border: 2px solid #3c7275; /* Borda na mesma cor */
+    
+    /* --- Espaçamento e Fonte --- */
+    padding: 8px 18px;
+    font-weight: 600; /* Texto mais forte para se destacar */
+    font-size: 0.9rem;
+    text-decoration: none;
+    text-transform: uppercase; /* Estilo mais formal */
+    letter-spacing: 0.5px;
+    display: inline-flex; /* Alinha o ícone e o texto perfeitamente */
+    align-items: center;
+    justify-content: center;
+
+    /* --- Efeitos e Transições --- */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out; /* Transição suave para todas as propriedades */
+}
+
+/* Espaçamento entre o ícone e o texto */
+.table-container .btn-primary i {
+    margin-right: 8px;
+    transition: transform 0.3s ease-in-out; /* Animação para o ícone */
+}
+
+/* Efeito ao passar o mouse por cima */
+.table-container .btn-primary:hover {
+    background-color: #3c7275; /* O fundo se preenche com a cor principal */
+    color: #ffffff; /* O texto e o ícone ficam brancos */
+    transform: translateY(-2px); /* Efeito de "levantar" o botão levemente */
+    box-shadow: 0 4px 12px rgba(60, 114, 117, 0.3); /* Sombra suave na cor do botão */
+}
+
+/* Animação extra no ícone ao passar o mouse */
+.table-container .btn-primary:hover i {
+    transform: rotate(90deg); /* O ícone de "+" gira */
+}

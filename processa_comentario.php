@@ -1,11 +1,10 @@
 <?php
-// processa_comentario.php
+// processa_comentario.php - VERSÃO FINAL COM NOTIFICAÇÕES COMPLETAS
 
 session_start();
 require_once 'config.php';
 require_once PROJECT_ROOT_PATH . '/conexao.php';
 require_once __DIR__ . '/includes/push_service.php';
-// ===== WEBSOCKET: INCLUIR O SERVIÇO DE MENSAGENS =====
 require_once __DIR__ . '/includes/websocket_service.php';
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -41,6 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conexao->begin_transaction();
 
     try {
+        // 1. INSERE O COMENTÁRIO E ANEXOS
         $sql_insert = "INSERT INTO comentarios_tickets (id_ticket, id_usuario, comentario, interno) VALUES (?, ?, ?, ?)";
         $stmt_insert = $conexao->prepare($sql_insert);
         $stmt_insert->bind_param("iisi", $id_chamado, $id_usuario_comentou, $comentario_texto, $eh_interno);
@@ -69,24 +69,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_anexo->close();
         }
         
-        if ($eh_interno == 0) {
-            $destinatarios_ids = [];
-            $mensagem_notificacao_app = "";
-            $titulo_push = "Novo Comentário no Chamado #{$id_chamado}";
-            $corpo_push = htmlspecialchars($nome_usuario_comentou) . ": " . (strlen($comentario_texto) > 50 ? substr($comentario_texto, 0, 50) . '...' : $comentario_texto);
+        // 2. ATUALIZA A DATA DO TICKET E SALVA A NOTIFICAÇÃO NO BANCO
+        $sql_update = "UPDATE tickets SET data_ultima_atualizacao = NOW() WHERE id = ?";
+        $stmt_update = $conexao->prepare($sql_update);
+        $stmt_update->bind_param("i", $id_chamado);
+        $stmt_update->execute();
+        $stmt_update->close();
 
+        $destinatarios_ids = [];
+        $mensagem_notificacao_app = "";
+        
+        if ($eh_interno == 0) {
             if ($tipo_usuario == 'ti') {
                 $destinatarios_ids[] = $ticket_info['id_solicitante'];
-                $mensagem_notificacao_app = "A equipa de TI comentou no seu chamado #" . $id_chamado . ".";
+                $mensagem_notificacao_app = "A equipe de TI comentou no seu chamado #" . $id_chamado . ".";
             } else {
                 if (!empty($ticket_info['id_agente_atribuido'])) {
                     $destinatarios_ids[] = $ticket_info['id_agente_atribuido'];
                 } else {
                     $sql_ti = "SELECT id FROM usuarios WHERE tipo_usuario = 'ti' AND ativo = 1";
                     $result_ti = $conexao->query($sql_ti);
-                    while($row = $result_ti->fetch_assoc()) {
-                        $destinatarios_ids[] = $row['id'];
-                    }
+                    while($row = $result_ti->fetch_assoc()) { $destinatarios_ids[] = $row['id']; }
                 }
                 $mensagem_notificacao_app = "O solicitante comentou no chamado #" . $id_chamado . ".";
             }
@@ -102,39 +105,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt_nova_notif->execute();
                 }
                 $stmt_nova_notif->close();
-                
-                enviar_notificacao_push($conexao, $destinatarios_ids, $id_chamado, $titulo_push, $corpo_push, 'chamado-' . $id_chamado);
-
-                // ===== WEBSOCKET: ENVIAR ATUALIZAÇÕES EM TEMPO REAL (CORRIGIDO) =====
-                // 1. Enviar notificação para o sino de cada destinatário
-                foreach($destinatarios_ids as $id_dest) {
-                    enviar_para_usuario($id_dest, ['type' => 'global_notification', 'message' => $mensagem_notificacao_app]);
-                }
-
-                // 2. Enviar o novo comentário para o tópico do chamado
-                $payload_comentario = ['type' => 'new_comment_added', 'payload' => [
-                    'nome_usuario' => $nome_usuario_comentou,
-                    'comentario' => $comentario_texto,
-                    'interno' => $eh_interno,
-                    'data_comentario' => date('Y-m-d H:i:s')
-                ]];
-                enviar_para_topico("chamado-{$id_chamado}", $payload_comentario);
-
-                // 3. Enviar a atualização da "Última Atualização" do ticket
-                $payload_detalhes = ['type' => 'update_ticket_details', 'payload' => [
-                    'data_ultima_atualizacao' => date('Y-m-d H:i:s')
-                ]];
-                enviar_para_topico("chamado-{$id_chamado}", $payload_detalhes);
             }
         }
         
-        $sql_update = "UPDATE tickets SET data_ultima_atualizacao = NOW() WHERE id = ?";
-        $stmt_update = $conexao->prepare($sql_update);
-        $stmt_update->bind_param("i", $id_chamado);
-        $stmt_update->execute();
-        $stmt_update->close();
-
+        // 3. SALVA TUDO PERMANENTEMENTE NO BANCO DE DADOS
         $conexao->commit();
+        
+        // 4. SÓ DEPOIS DE SALVAR, ENVIA AS NOTIFICAÇÕES EM TEMPO REAL
+        if ($eh_interno == 0 && !empty($destinatarios_ids)) {
+            // Envia a Notificação Push
+            $titulo_push = "Novo Comentário no Chamado #{$id_chamado}";
+            $corpo_push = htmlspecialchars($nome_usuario_comentou) . ": " . (strlen($comentario_texto) > 50 ? substr($comentario_texto, 0, 50) . '...' : $comentario_texto);
+            enviar_notificacao_push($conexao, $destinatarios_ids, $id_chamado, $titulo_push, $corpo_push, 'chamado-' . $id_chamado);
+
+            // Envia a atualização para a página de detalhes do chamado (para todos que a veem)
+            $payload_comentario = ['type' => 'new_comment_added', 'payload' => [
+                'nome_usuario' => $nome_usuario_comentou, 'comentario' => $comentario_texto,
+                'interno' => $eh_interno, 'data_comentario' => date('Y-m-d H:i:s')
+            ]];
+            enviar_para_topico("chamado-{$id_chamado}", $payload_comentario);
+            
+            // Envia um sinal para o painel de cada destinatário se atualizar
+            foreach($destinatarios_ids as $id_dest) {
+                enviar_para_usuario($id_dest, ['type' => 'refresh_dashboard']);
+            }
+        }
         
     } catch (Exception $e) {
         $conexao->rollback();
@@ -142,6 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['mensagem_erro'] = "Ocorreu um erro ao processar sua solicitação.";
     }
     
+    // Redireciona de volta para a página de detalhes no final
     header("Location: detalhes_chamado.php?id=" . $id_chamado);
     exit();
 }

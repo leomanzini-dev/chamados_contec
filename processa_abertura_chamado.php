@@ -1,5 +1,5 @@
 <?php
-// processa_abertura_chamado.php - VERSÃO FINAL E SIMPLIFICADA
+// processa_abertura_chamado.php - VERSÃO COM CORREÇÃO DE ANEXO
 
 session_start();
 require_once 'config.php';
@@ -35,7 +35,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conexao->begin_transaction();
 
     try {
-        // --- LÓGICA DE BANCO DE DADOS ---
         $id_status_aberto = 1;
         $id_agente_para_salvar = ($id_agente_designado > 0) ? $id_agente_designado : null;
 
@@ -46,9 +45,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $id_novo_ticket = $stmt_ticket->insert_id;
         $stmt_ticket->close();
 
-        // Lógica de Anexos ...
+        $sql_count = "SELECT COUNT(id) as total FROM tickets WHERE id_solicitante = ?";
+        $stmt_count = $conexao->prepare($sql_count);
+        $stmt_count->bind_param("i", $id_solicitante);
+        $stmt_count->execute();
+        $total_chamados_usuario = $stmt_count->get_result()->fetch_assoc()['total'];
+        $stmt_count->close();
+        
+        $sql_update_seq = "UPDATE tickets SET id_chamado_usuario = ? WHERE id = ?";
+        $stmt_update_seq = $conexao->prepare($sql_update_seq);
+        $stmt_update_seq->bind_param("ii", $total_chamados_usuario, $id_novo_ticket);
+        $stmt_update_seq->execute();
+        $stmt_update_seq->close();
 
-        // Lógica para salvar a notificação no banco
+        // LÓGICA DE UPLOAD CORRIGIDA
+        if (isset($_FILES['anexos']) && !empty($_FILES['anexos']['name'][0])) {
+            $pasta_uploads = PROJECT_ROOT_PATH . '/uploads/';
+            if (!is_dir($pasta_uploads)) { mkdir($pasta_uploads, 0777, true); }
+            
+            // Usando o nome da coluna que o seu erro de log indicou
+            $sql_anexo = "INSERT INTO anexos_tickets (id_ticket, nome_arquivo_armazenado, nome_arquivo_original, tamanho_bytes) VALUES (?, ?, ?, ?)";
+            $stmt_anexo = $conexao->prepare($sql_anexo);
+
+            foreach ($_FILES['anexos']['name'] as $key => $nome_original) {
+                if ($_FILES['anexos']['error'][$key] === UPLOAD_ERR_OK) {
+                    $nome_tmp = $_FILES['anexos']['tmp_name'][$key];
+                    $tamanho_bytes = $_FILES['anexos']['size'][$key];
+                    // Gerando um nome único para o arquivo no servidor
+                    $nome_unico = uniqid('chamado' . $id_novo_ticket . '_', true) . '-' . basename($nome_original);
+                    $caminho_final = $pasta_uploads . $nome_unico;
+                    
+                    if (move_uploaded_file($nome_tmp, $caminho_final)) {
+                        // O nome salvo no banco é o nome único gerado
+                        $stmt_anexo->bind_param("issi", $id_novo_ticket, $nome_unico, $nome_original, $tamanho_bytes);
+                        $stmt_anexo->execute();
+                    }
+                }
+            }
+            $stmt_anexo->close();
+        }
+        
         $destinatarios_ids = [];
         if ($id_agente_para_salvar) {
             $destinatarios_ids[] = $id_agente_para_salvar;
@@ -67,25 +103,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql_nova_notif->close();
         }
 
-        // 1. PRIMEIRO, SALVA TUDO PERMANENTEMENTE NO BANCO
         $conexao->commit();
 
-        // 2. DEPOIS, ENVIA AS NOTIFICAÇÕES EXTERNAS E OS SINAIS
         if (!empty($destinatarios_ids)) {
-            // Envia a notificação Push (que independe da tela)
             enviar_notificacao_push($conexao, $destinatarios_ids, $id_novo_ticket, 'Novo Chamado Aberto: #' . $id_novo_ticket, htmlspecialchars($nome_solicitante) . " abriu um chamado sobre: " . htmlspecialchars($motivo_chamado), 'chamado-' . $id_novo_ticket);
-
-            // ENVIA UM ÚNICO SINAL PARA O PAINEL DE TI
             enviar_para_topico('dashboard-ti', [ 'type' => 'refresh_dashboard' ]);
         }
         
-        // 3. Responde ao colaborador que a operação foi um sucesso
-        enviar_resposta(true, 'Chamado aberto com sucesso!', ['ticket_id' => $id_novo_ticket]);
+        enviar_resposta(true, 'Chamado aberto com sucesso!', ['ticket_id' => $total_chamados_usuario]);
 
     } catch (Exception $e) {
         $conexao->rollback();
         error_log("Erro ao abrir chamado: " . $e->getMessage());
-        enviar_resposta(false, 'Ocorreu um erro no servidor.');
+        enviar_resposta(false, 'Ocorreu um erro no servidor. Verifique o log para detalhes.');
     }
     
 } else {
