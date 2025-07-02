@@ -1,4 +1,8 @@
 <?php
+/*
+ARQUIVO DESATIVADO EM 01/07/2025 DURANTE A REMOÇÃO DAS NOTIFICAÇÕES PUSH.
+ESTE SCRIPT NÃO É MAIS NECESSÁRIO POIS O LADO DO CLIENTE (JS) NÃO ENVIA MAIS DADOS DE INSCRIÇÃO.
+
 // save-subscription.php
 
 require_once __DIR__ . '/config.php';
@@ -6,16 +10,16 @@ require_once PROJECT_ROOT_PATH . '/conexao.php';
 session_start();
 
 if (!isset($_SESSION['usuario_id'])) {
-    http_response_code(403);
-    exit();
+    http_response_code(403);
+    exit();
 }
 
 $id_usuario = $_SESSION['usuario_id'];
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!isset($data['endpoint'])) {
-    http_response_code(400);
-    exit();
+    http_response_code(400);
+    exit();
 }
 
 $endpoint = $data['endpoint'];
@@ -30,17 +34,24 @@ $stmt_check->execute();
 $result_check = $stmt_check->get_result();
 
 if ($result_check->num_rows > 0) {
-    // A subscrição já existe, podemos apenas garantir que está associada ao utilizador correto
-    $sql_update = "UPDATE push_subscriptions SET id_usuario = ? WHERE endpoint = ?";
-    $stmt_update = $conexao->prepare($sql_update);
-    $stmt_update->bind_param("is", $id_usuario, $endpoint);
-    $stmt_update->execute();
+    // A subscrição já existe, podemos apenas garantir que está associada ao utilizador correto
+    $sql_update = "UPDATE push_subscriptions SET id_usuario = ? WHERE endpoint = ?";
+    $stmt_update = $conexao->prepare($sql_update);
+    $stmt_update->bind_param("is", $id_usuario, $endpoint);
+    $stmt_update->execute();
 } else {
-    // Insere a nova subscrição
-    $sql_insert = "INSERT INTO push_subscriptions (id_usuario, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)";
-    $stmt_insert = $conexao->prepare($sql_insert);
-    $stmt_insert->bind_param("isss", $id_usuario, $endpoint, $p256dh, $auth);
-    $stmt_insert->execute();
+    // Insere a nova subscrição
+    $sql_insert = "INSERT INTO push_subscriptions (id_usuario, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)";
+    $stmt_insert = $conexao->prepare($sql_insert);
+    $stmt_insert->bind_param("isss", $id_usuario, $endpoint, $p256dh, $auth);
+    $stmt_insert->execute();
 }
 
 http_response_code(201);
+
+*/
+
+// Responde com sucesso, mas não faz nada, para o caso de algum client antigo ainda chamar este endpoint.
+http_response_code(200);
+echo "Push notifications are deprecated.";
+?>

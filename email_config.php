@@ -1,14 +1,30 @@
 <?php
-// email_config.php - CONFIGURADO PARA OUTLOOK/OFFICE 365
+// email_config.php (VERSÃO CORRIGIDA)
 
-// Define as configurações do servidor de envio de e-mail (SMTP)
-define('SMTP_HOST', 'mail.contec1996.com.br');      // Servidor SMTP da Microsoft
-define('SMTP_USERNAME', 'informatica@contec1996.com.br'); // Coloque aqui o seu e-mail completo do Outlook
-define('SMTP_PASSWORD', 'ContecMatao2024**');   // Coloque aqui a senha do seu e-mail
-define('SMTP_PORT', 587);                        // Porta padrão para STARTTLS
-define('SMTP_SECURE', 'tls');                    // Tipo de criptografia (geralmente 'tls' para a porta 587)
+// --- Configurações do Servidor de Envio (SMTP) ---
 
-// Define as informações do remetente (quem está enviando)
-define('EMAIL_FROM', 'naoresponda_chamadoscontec@contec1996.com.br');  // Repita seu e-mail aqui
-define('EMAIL_FROM_NAME', 'Sistema de Chamados Contec'); // Nome que aparecerá para quem receber o e-mail
-?>
+// Host do seu servidor de e-mail.
+define('SMTP_HOST', 'mail.contec1996.com.br');
+
+// Usuário de autenticação no servidor SMTP (geralmente o e-mail completo).
+define('SMTP_USERNAME', 'informatica@contec1996.com.br'); 
+
+// SENHA do e-mail acima. POR FAVOR, TROQUE SUA SENHA E PREENCHA A NOVA AQUI.
+define('SMTP_PASSWORD', 'ContecMatao2024**');
+
+// Porta do servidor SMTP. 587 para TLS (recomendado), 465 para SSL.
+define('SMTP_PORT', 587);
+
+// Tipo de criptografia. 'tls' para porta 587, 'ssl' para porta 465.
+define('SMTP_SECURE', 'tls');
+
+
+// --- Informações do Remetente (Quem envia o e-mail) ---
+
+// O e-mail que aparecerá no campo "De:" para o destinatário.
+define('EMAIL_FROM', 'naoresponda_chamadoscontec@contec1996.com.br');
+
+// O nome que aparecerá no campo "De:" para o destinatário.
+define('EMAIL_FROM_NAME', 'Sistema de Chamados Contec');
+
+// A TAG DE FECHAMENTO ?>

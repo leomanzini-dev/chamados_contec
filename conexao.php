@@ -1,4 +1,5 @@
 <?php
+// conexao.php (VERSÃO CORRIGIDA)
 
 // Definições do Banco de Dados
 define('DB_SERVER', 'localhost'); // Geralmente 'localhost' para XAMPP
@@ -27,4 +28,5 @@ if (!$conexao->set_charset("utf8mb4")) {
 
 // A variável $conexao estará disponível para ser usada em outros scripts PHP
 // que incluírem este arquivo.
-?>
+
+// A TAG DE FECHAMENTO ?>
