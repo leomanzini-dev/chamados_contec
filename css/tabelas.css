@@ -1,35 +1,68 @@
-/* css/tabelas.css - Unificado com scroll vertical e cabeçalho fixo */
+/* css/tabelas.css - Versão final, limpa e organizada */
 
-/* 1. O Contentor da Tabela */
+/* =================================
+   Estilos para o Filtro e Animação
+   ================================= */
+
+.filtros-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.filtros-body {
+    /* Estado inicial: Escondido */
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    /* Removemos padding e margin no estado fechado para a animação ficar perfeita */
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    transition: all 0.4s ease-in-out; /* A transição suave */
+}
+
+/* Estado 'aberto' que será ativado via JavaScript */
+.filtros-container.aberto .filtros-body {
+    max-height: 500px; /* Altura máxima grande o suficiente para o conteúdo */
+    opacity: 1;
+    /* Devolvemos o padding e margin no estado aberto */
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-top: 15px;
+}
+
+/* Animação da seta de abrir/fechar */
+.filtros-header .toggle-btn i {
+    transition: transform 0.4s ease-in-out;
+}
+
+.filtros-container.aberto .toggle-btn i {
+    transform: rotate(180deg);
+}
+
+
+/* =================================
+   Estilos para a Estrutura da Tabela
+   ================================= */
+
 .table-container {
     width: 100%;
-    /* Garante que a tabela tenha um scroll horizontal caso o conteúdo seja muito largo */
-    overflow-x: auto;
-    
-    /* << ALTERAÇÃO >> Define uma altura máxima para o contentor da tabela.
-       Usei 70vh, que significa 70% da altura da janela do navegador.
-       Pode ajustar este valor (ex: 60vh ou 650px) conforme preferir. */
-    max-height: 70vh;
-    
-    /* << ALTERAÇÃO >> Adiciona uma barra de scroll vertical apenas se a tabela for mais alta que a max-height */
-    overflow-y: auto;
-    
+    overflow-x: auto; /* Scroll horizontal para telas pequenas */
+    max-height: 70vh; /* Altura máxima antes de aparecer o scroll vertical */
+    overflow-y: auto; /* Scroll vertical para tabelas longas */
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio-borda);
     box-shadow: var(--sombra-suave);
     background-color: white;
 }
 
-/* 2. A Tabela Principal de Dados */
-/* Mantive os seus estilos existentes, mas apliquei-os à classe .data-table para serem mais específicos */
 .data-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95rem;
-    min-width: 900px; /* Garante que as colunas não fiquem demasiado espremidas */
+    min-width: 900px; /* Largura mínima para evitar quebra de layout */
 }
 
-/* 3. Células do Corpo e Cabeçalho */
 .data-table th, .data-table td {
     text-align: left;
     padding: 16px 20px;
@@ -41,7 +74,6 @@
     border-bottom: none;
 }
 
-/* 4. O Cabeçalho da Tabela (thead) */
 .data-table thead th {
     background-color: #f9fafb;
     color: var(--cor-texto-secundario);
@@ -50,19 +82,16 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
-    
-    /* << ALTERAÇÃO >> A "magia" que faz o cabeçalho ficar fixo no topo ao rolar */
-    position: sticky;
+    position: sticky; /* A "mágica" que faz o cabeçalho ficar fixo */
     top: 0;
-    z-index: 1; /* Garante que o cabeçalho fica por cima do conteúdo da tabela */
+    z-index: 1;
 }
 
-/* 5. O Corpo da Tabela (tbody) */
 .data-table tbody tr:hover {
-    background-color: #f9fafb; /* O seu estilo de hover foi mantido */
+    background-color: #f9fafb;
 }
 
-/* Seus ajustes específicos para colunas foram mantidos */
+/* Ajustes específicos de alinhamento e largura das colunas */
 .data-table th:first-child, .data-table td:first-child {
     text-align: center;
     width: 60px;
@@ -78,25 +107,7 @@
     white-space: nowrap;
 }
 
-/* Botão de Ações na tabela */
-.data-table .btn-acao {
-    background-color: var(--cor-principal);
-    color: white;
-    padding: 8px 14px;
-    text-decoration: none;
-    border-radius: 6px;
-    font-size: 0.9em;
-    transition: var(--transicao-rapida);
-    white-space: nowrap;
-}
-
-.data-table .btn-acao:hover {
-    background-color: var(--cor-secundaria);
-    text-decoration: none;
-    opacity: 1;
-}
-
-/* Célula para quando não há resultados */
+/* Mensagem para quando a tabela está vazia */
 .nenhum-chamado {
     text-align: center;
     padding: 40px;
@@ -104,7 +115,7 @@
     color: var(--cor-texto-secundario);
 }
 
-/* Estilos para as pílulas de status - Mantidos do seu código */
+/* Estilos para as "pílulas" de status */
 .status {
     padding: 5px 10px;
     border-radius: 20px;
@@ -122,49 +133,3 @@
 .status-pausado { background-color: #6366f1; }
 .status-resolvido { background-color: #22c55e; }
 .status-cancelado { background-color: #ef4444; }
-
-/* ================================================================= */
-/* Estilo Criativo "Ghost Button" para o Botão "Abrir Novo Chamado" */
-/* ================================================================= */
-
-.table-container .btn-primary {
-    /* --- Cor e Fundo --- */
-    background-color: transparent; /* Fundo transparente, o "fantasma" */
-    color: #3c7275; /* Cor do texto e do ícone, um verde-azulado do seu painel */
-    border: 2px solid #3c7275; /* Borda na mesma cor */
-    
-    /* --- Espaçamento e Fonte --- */
-    padding: 8px 18px;
-    font-weight: 600; /* Texto mais forte para se destacar */
-    font-size: 0.9rem;
-    text-decoration: none;
-    text-transform: uppercase; /* Estilo mais formal */
-    letter-spacing: 0.5px;
-    display: inline-flex; /* Alinha o ícone e o texto perfeitamente */
-    align-items: center;
-    justify-content: center;
-
-    /* --- Efeitos e Transições --- */
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out; /* Transição suave para todas as propriedades */
-}
-
-/* Espaçamento entre o ícone e o texto */
-.table-container .btn-primary i {
-    margin-right: 8px;
-    transition: transform 0.3s ease-in-out; /* Animação para o ícone */
-}
-
-/* Efeito ao passar o mouse por cima */
-.table-container .btn-primary:hover {
-    background-color: #3c7275; /* O fundo se preenche com a cor principal */
-    color: #ffffff; /* O texto e o ícone ficam brancos */
-    transform: translateY(-2px); /* Efeito de "levantar" o botão levemente */
-    box-shadow: 0 4px 12px rgba(60, 114, 117, 0.3); /* Sombra suave na cor do botão */
-}
-
-/* Animação extra no ícone ao passar o mouse */
-.table-container .btn-primary:hover i {
-    transform: rotate(90deg); /* O ícone de "+" gira */
-}

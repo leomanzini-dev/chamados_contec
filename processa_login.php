@@ -19,7 +19,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         enviar_resposta_json(false, "Por favor, preencha o e-mail e a senha.");
     }
 
-    $sql = "SELECT id, nome_completo, email, senha, tipo_usuario, ativo FROM usuarios WHERE email = ?";
+    // 1. ADICIONE 'departamento' À SUA CONSULTA SQL
+    $sql = "SELECT id, nome_completo, email, senha, tipo_usuario, departamento, ativo FROM usuarios WHERE email = ?";
+    
     if ($stmt = $conexao->prepare($sql)) {
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -38,6 +40,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['usuario_nome'] = $usuario['nome_completo'];
                 $_SESSION['usuario_email'] = $usuario['email'];
                 $_SESSION['usuario_tipo'] = $usuario['tipo_usuario'];
+                
+                // 2. SALVE O DEPARTAMENTO NA SESSÃO
+                $_SESSION['usuario_departamento'] = $usuario['departamento'];
+
                 enviar_resposta_json(true);
             } else {
                 enviar_resposta_json(false, "E-mail ou senha inválidos.");

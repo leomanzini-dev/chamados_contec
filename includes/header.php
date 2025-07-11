@@ -14,6 +14,7 @@ if (!isset($_SESSION['usuario_id'])) {
 $id_usuario_logado = $_SESSION['usuario_id'];
 $nome_usuario = $_SESSION['usuario_nome'];
 $tipo_usuario = $_SESSION['usuario_tipo'];
+$departamento_usuario = $_SESSION['usuario_departamento'] ?? null;
 $pagina_atual = basename($_SERVER['PHP_SELF']);
 
 // --- LÓGICA PARA BUSCAR NOTIFICAÇÕES ---
@@ -50,16 +51,24 @@ if (isset($conexao)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="css/global.css?v=<?php echo filemtime('css/global.css'); ?>">
-    <link rel="stylesheet" href="css/dashboard.css?v=<?php echo filemtime('css/dashboard.css'); ?>">
-    <?php if (isset($css_pagina) && file_exists('css/' . $css_pagina)): ?>
-        <link rel="stylesheet" href="css/<?php echo $css_pagina; ?>?v=<?php echo filemtime('css/' . $css_pagina); ?>">
+    
+    <link rel="stylesheet" href="/chamados_contec/css/global.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="/chamados_contec/css/sidebar.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="/chamados_contec/css/dashboard.css?v=<?php echo time(); ?>">
+    
+    <?php if (!empty($css_pagina)): ?>
+        <?php
+            // Lógica para lidar com caminhos de subpastas, como em 'faq_dp'
+            $caminho_css_final = (strpos($css_pagina, '../') === 0) 
+                               ? str_replace('../', '/chamados_contec/', $css_pagina)
+                               : '/chamados_contec/css/' . $css_pagina;
+        ?>
+        <link rel="stylesheet" href="<?php echo $caminho_css_final; ?>?v=<?php echo time(); ?>">
     <?php endif; ?>
 
-    <script src="js/dashboard.js?v=<?php echo filemtime('js/dashboard.js'); ?>" defer></script>
-    <script src="js/push_manager.js?v=<?php echo filemtime('js/push_manager.js'); ?>" defer></script>
-    <script src="js/websocket_client.js?v=<?php echo filemtime('js/websocket_client.js'); ?>" defer></script>
-    <script src="js/notificacoes.js?v=<?php echo filemtime('js/notificacoes.js'); ?>"></script>
+    <script src="/chamados_contec/js/dashboard.js?v=<?php echo time(); ?>" defer></script>
+    <script src="/chamados_contec/js/websocket_client.js?v=<?php echo time(); ?>" defer></script>
+    <script src="/chamados_contec/js/notificacoes.js?v=<?php echo time(); ?>"></script>
 
 </head>
 <body data-usuario-id="<?php echo htmlspecialchars($id_usuario_logado); ?>"

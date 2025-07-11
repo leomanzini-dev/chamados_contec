@@ -1,8 +1,8 @@
-// js/abrir_chamado.js
+// js/abrir_chamado.js (VERSÃO FINAL COM ENVIO ROBUSTO)
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- Lógica para as Sugestões da Base de Conhecimento ---
+    // --- Lógica para as Sugestões da Base de Conhecimento (Mantida) ---
     const campoAssunto = document.getElementById('motivo_chamado');
     const containerSugestoes = document.getElementById('sugestoes-kb');
     let timeoutBusca = null;
@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (termo.length < 3) {
                 containerSugestoes.style.display = 'none';
-                containerSugestoes.innerHTML = '';
                 return;
             }
 
@@ -53,25 +52,101 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Lógica de Submissão do Formulário com Animação ---
+    // --- LÓGICA DE PASTE E SUBMISSÃO UNIFICADA ---
+
     const form = document.getElementById('form-abrir-chamado');
     const loadingOverlay = document.getElementById('loading-overlay');
     const successModal = document.getElementById('success-modal');
     const successMessage = document.getElementById('success-message');
 
+    const triggerElement = document.getElementById('descricao_detalhada');
+    const previewContainer = document.getElementById('preview-container-abrir');
+    let arquivosColados = [];
+
+    function renderizarPreviews() {
+        previewContainer.innerHTML = "";
+        previewContainer.style.display = arquivosColados.length > 0 ? "flex" : "none";
+        arquivosColados.forEach((arquivo, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const item = document.createElement("div");
+                item.className = "paste-preview-item";
+                item.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" class="paste-preview-remove" title="Remover">&times;</button>`;
+                item.querySelector(".paste-preview-remove").onclick = () => {
+                    arquivosColados.splice(index, 1);
+                    renderizarPreviews();
+                };
+                previewContainer.appendChild(item);
+            };
+            reader.readAsDataURL(arquivo);
+        });
+    }
+    
+    if (triggerElement) {
+        triggerElement.addEventListener("paste", function(event) {
+            const items = (event.clipboardData || window.clipboardData).items;
+            let foiImagem = false;
+            for (const item of items) {
+                if (item.kind === "file" && item.type.startsWith("image/")) {
+                    foiImagem = true;
+                    const blob = item.getAsFile();
+                    const arquivoImagem = new File([blob], `print_${Date.now()}.png`, { type: "image/png" });
+                    arquivosColados.push(arquivoImagem);
+                }
+            }
+            if (foiImagem) {
+                event.preventDefault();
+                setTimeout(renderizarPreviews, 100);
+            }
+        });
+    }
+
     if (form && loadingOverlay && successModal && successMessage) {
         form.addEventListener('submit', function(event) {
             event.preventDefault();
             loadingOverlay.style.display = 'flex';
-            const formData = new FormData(form);
+            
+            // ==========================================================
+            // INÍCIO DA MUDANÇA PARA O ENVIO ROBUSTO
+            // ==========================================================
 
-            fetch(form.action, { // Usa o 'action' do formulário para ser mais robusto
+            // 1. Criamos um FormData VAZIO
+            const formData = new FormData();
+
+            // 2. Adicionamos os campos de texto e outros inputs manualmente
+            for (const element of form.elements) {
+                if (element.name && element.type !== 'file' && element.type !== 'submit') {
+                    formData.append(element.name, element.value);
+                }
+            }
+
+            // 3. Adicionamos os arquivos selecionados pelo BOTÃO
+            const anexoInput = form.querySelector('input[type="file"]');
+            if (anexoInput && anexoInput.files.length > 0) {
+                for (const file of anexoInput.files) {
+                    formData.append('anexos[]', file, file.name);
+                }
+            }
+            
+            // 4. Adicionamos os arquivos que foram COLADOS (Ctrl+V)
+            arquivosColados.forEach(arquivo => {
+                formData.append("anexos[]", arquivo, arquivo.name);
+            });
+
+            // ==========================================================
+            // FIM DA MUDANÇA
+            // ==========================================================
+
+            fetch(form.action, {
                 method: 'POST',
                 body: formData
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`Erro no servidor! Status: ${response.status}`);
+                    // Tenta ler o corpo do erro como JSON para uma mensagem mais clara
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || `Erro no servidor! Status: ${response.status}`);
+                    });
                 }
                 return response.json();
             })
@@ -84,13 +159,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         window.location.href = 'painel.php';
                     }, 3000);
                 } else {
-                    // Usamos um modal ou um alerta mais elegante em vez do alert()
                     alert('Erro ao abrir chamado: ' + data.message);
                 }
             })
             .catch(error => {
                 loadingOverlay.style.display = 'none';
-                alert('Ocorreu um erro de comunicação. Tente novamente.');
+                alert('Ocorreu um erro: ' + error.message);
                 console.error('Erro no fetch:', error);
             });
         });

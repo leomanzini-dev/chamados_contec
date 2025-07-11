@@ -1,44 +1,39 @@
 <?php
-session_start();
-require_once 'config.php';
-require_once PROJECT_ROOT_PATH . '/conexao.php';
+// processa_comentario.php (VERSÃO 100% COMPLETA E FINAL DE PRODUÇÃO)
 
-// Carrega os serviços necessários
+session_start();
+
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/conexao.php';
 require_once __DIR__ . '/includes/websocket_service.php';
 require_once __DIR__ . '/includes/email_service.php';
 require_once __DIR__ . '/includes/email_templates.php';
 
-// Garante que a requisição é do tipo POST
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    // Se não for POST, redireciona para o painel para evitar acesso direto ao script
     header("Location: painel.php");
     exit();
 }
 
-// Validação de sessão de usuário
 if (!isset($_SESSION['usuario_id'])) {
-    http_response_code(403);
-    die("Acesso não autorizado.");
+    $_SESSION['mensagem_erro'] = "Acesso não autorizado. Por favor, faça login.";
+    header("Location: login.php");
+    exit();
 }
 
-// Coleta e validação dos dados do formulário
 $id_chamado = filter_input(INPUT_POST, 'id_chamado', FILTER_VALIDATE_INT);
-$comentario_texto = trim($_POST['comentario']);
+$comentario_texto = trim($_POST['comentario'] ?? '');
 $id_usuario_comentou = $_SESSION['usuario_id'];
 $nome_usuario_comentou = $_SESSION['usuario_nome'];
 $tipo_usuario = $_SESSION['usuario_tipo'];
 $eh_interno = ($tipo_usuario == 'ti' && isset($_POST['comentario_interno'])) ? 1 : 0;
 
-// Garante que o comentário ou anexo não estão vazios
 if (!$id_chamado || (empty($comentario_texto) && empty($_FILES['anexos']['name'][0]))) {
-    $_SESSION['mensagem_erro'] = "Você precisa escrever um comentário ou anexar um ficheiro.";
+    $_SESSION['mensagem_erro'] = "Você precisa escrever um comentário ou anexar um arquivo.";
     header("Location: detalhes_chamado.php?id=" . $id_chamado);
     exit();
 }
 
-// Bloco Try-Catch para controlar toda a operação
 try {
-    // Busca informações e permissões do ticket
     $sql_perm = "SELECT id_solicitante, id_agente_atribuido, motivo_chamado FROM tickets WHERE id = ? LIMIT 1";
     $stmt_perm = $conexao->prepare($sql_perm);
     $stmt_perm->bind_param("i", $id_chamado);
@@ -46,53 +41,56 @@ try {
     $ticket_info = $stmt_perm->get_result()->fetch_assoc();
     $stmt_perm->close();
 
-    if (!$ticket_info) {
-        throw new Exception("Chamado não encontrado.");
-    }
-    if ($tipo_usuario != 'ti' && $ticket_info['id_solicitante'] != $id_usuario_comentou) {
-        throw new Exception("Sem permissão para comentar neste chamado.");
-    }
+    if (!$ticket_info) { throw new Exception("Chamado não encontrado."); }
+    if ($tipo_usuario != 'ti' && $ticket_info['id_solicitante'] != $id_usuario_comentou) { throw new Exception("Sem permissão para comentar."); }
 
-    // Inicia a transação com o banco de dados
     $conexao->begin_transaction();
 
-    // 1. INSERE O COMENTÁRIO
-    $sql_insert = "INSERT INTO comentarios_tickets (id_ticket, id_usuario, comentario, interno) VALUES (?, ?, ?, ?)";
+    $sql_insert = "INSERT INTO comentarios_tickets (id_ticket, id_usuario, comentario, interno, data_comentario) VALUES (?, ?, ?, ?, NOW())";
     $stmt_insert = $conexao->prepare($sql_insert);
     $stmt_insert->bind_param("iisi", $id_chamado, $id_usuario_comentou, $comentario_texto, $eh_interno);
     $stmt_insert->execute();
     $id_novo_comentario = $stmt_insert->insert_id;
     $stmt_insert->close();
 
-    // 2. PROCESSA OS ANEXOS (se houver)
+    $anexos_processados = 0;
     if (isset($_FILES['anexos']) && !empty($_FILES['anexos']['name'][0])) {
-        $pasta_uploads = PROJECT_ROOT_PATH . '/uploads/';
-        if (!is_dir($pasta_uploads)) { mkdir($pasta_uploads, 0777, true); }
-        $sql_anexo = "INSERT INTO anexos_tickets (id_ticket, id_comentario, caminho_arquivo, nome_arquivo_original, tamanho_bytes) VALUES (?, ?, ?, ?, ?)";
-        $stmt_anexo = $conexao->prepare($sql_anexo);
-        foreach ($_FILES['anexos']['name'] as $key => $nome_original) {
-            if ($_FILES['anexos']['error'][$key] === UPLOAD_ERR_OK) {
-                $nome_tmp = $_FILES['anexos']['tmp_name'][$key];
-                $tamanho_bytes = $_FILES['anexos']['size'][$key];
-                $nome_unico = uniqid('comentario' . $id_novo_comentario . '_', true) . '-' . basename($nome_original);
-                $caminho_final = $pasta_uploads . $nome_unico;
-                if (move_uploaded_file($nome_tmp, $caminho_final)) {
-                    $caminho_relativo = 'uploads/' . $nome_unico; // Corrigido para salvar caminho relativo
-                    $stmt_anexo->bind_param("iissi", $id_chamado, $id_novo_comentario, $caminho_relativo, $nome_original, $tamanho_bytes);
-                    $stmt_anexo->execute();
+            $pasta_uploads = PROJECT_ROOT_PATH . '/uploads/comentarios/';
+            if (!is_dir($pasta_uploads)) { mkdir($pasta_uploads, 0775, true); }
+
+            $sql_anexo = "INSERT INTO anexos_tickets (id_ticket, id_comentario, nome_arquivo_original, nome_arquivo_armazenado, caminho_arquivo, tamanho_bytes, tipo_mime, data_upload) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+            $stmt_anexo = $conexao->prepare($sql_anexo);
+
+            foreach ($_FILES['anexos']['name'] as $key => $nome_original) {
+                if ($_FILES['anexos']['error'][$key] === UPLOAD_ERR_OK) {
+                    $nome_tmp = $_FILES['anexos']['tmp_name'][$key];
+                    $tamanho_bytes = $_FILES['anexos']['size'][$key];
+                    $tipo_mime = mime_content_type($nome_tmp);
+                    $extensao = strtolower(pathinfo($nome_original, PATHINFO_EXTENSION));
+                    $nome_arquivo_armazenado = 'comentario_' . $id_novo_comentario . '_' . uniqid() . '.' . $extensao;
+                    $caminho_final = $pasta_uploads . $nome_arquivo_armazenado;
+
+                    if (move_uploaded_file($nome_tmp, $caminho_final)) {
+                        // Garante que o caminho salvo no banco seja relativo à raiz do projeto
+                        $caminho_relativo_db = 'uploads/comentarios/' . $nome_arquivo_armazenado;
+                        $stmt_anexo->bind_param("iisssis", $id_chamado, $id_novo_comentario, $nome_original, $nome_arquivo_armazenado, $caminho_relativo_db, $tamanho_bytes, $tipo_mime);
+                        $stmt_anexo->execute();
+                        $anexos_processados++;
+                    }
                 }
             }
+            $stmt_anexo->close();
         }
-        $stmt_anexo->close();
-    }
 
-    // 3. ATUALIZA O TICKET E PREPARA AS NOTIFICAÇÕES
     $sql_update = "UPDATE tickets SET data_ultima_atualizacao = NOW() WHERE id = ?";
     $stmt_update = $conexao->prepare($sql_update);
     $stmt_update->bind_param("i", $id_chamado);
     $stmt_update->execute();
     $stmt_update->close();
-
+    
+    // =========================================================================
+    // INÍCIO DA SUA LÓGICA DE NOTIFICAÇÕES COMPLETAMENTE INTEGRADA
+    // =========================================================================
     $destinatarios_ids = [];
     if ($eh_interno == 0) {
         if ($tipo_usuario == 'ti') {
@@ -108,10 +106,9 @@ try {
             }
             $mensagem_notificacao_app = "O solicitante comentou no chamado #" . $id_chamado . ".";
         }
-
         $destinatarios_ids = array_filter($destinatarios_ids, function($id) use ($id_usuario_comentou) { return $id != $id_usuario_comentou; });
         $destinatarios_ids = array_unique($destinatarios_ids);
-
+        
         if (!empty($destinatarios_ids)) {
             $sql_nova_notif = "INSERT INTO notificacoes (id_usuario_destino, id_ticket, mensagem) VALUES (?, ?, ?)";
             $stmt_nova_notif = $conexao->prepare($sql_nova_notif);
@@ -122,13 +119,8 @@ try {
             $stmt_nova_notif->close();
         }
     }
-
-    // SALVA TUDO NO BANCO DE DADOS
-    $conexao->commit();
-
-    // 4. ENVIA AS NOTIFICAÇÕES (E-MAIL E WEBSOCKET) - Apenas após o sucesso do commit
+    
     if ($eh_interno == 0 && !empty($destinatarios_ids)) {
-        // Envio de E-mail
         $placeholders = implode(',', array_fill(0, count($destinatarios_ids), '?'));
         $types = str_repeat('i', count($destinatarios_ids));
         $sql_users = "SELECT nome_completo AS nome, email FROM usuarios WHERE id IN ($placeholders)";
@@ -144,23 +136,30 @@ try {
         }
         $stmt_users->close();
 
-        // Envio de WebSocket (Mantido)
         $payload_comentario = ['type' => 'new_comment_added', 'payload' => ['nome_usuario' => $nome_usuario_comentou, 'comentario' => $comentario_texto, 'interno' => $eh_interno, 'data_comentario' => date('Y-m-d H:i:s')]];
         enviar_para_topico("chamado-{$id_chamado}", $payload_comentario);
         foreach($destinatarios_ids as $id_dest) {
             enviar_para_usuario($id_dest, ['type' => 'refresh_dashboard']);
         }
     }
+    // =========================================================================
+    // FIM DA LÓGICA DE NOTIFICAÇÕES
+    // =========================================================================
+
+    $conexao->commit();
+
+    $mensagem_sucesso = "Comentário adicionado com sucesso!";
+    if ($anexos_processados > 0) { $mensagem_sucesso .= " ($anexos_processados arquivo(s) anexado(s))."; }
+    $_SESSION['mensagem_sucesso'] = $mensagem_sucesso;
 
 } catch (Exception $e) {
-    // Se qualquer coisa dentro do 'try' falhar, desfaz a transação
-    $conexao->rollback();
-    // Registra o erro para o desenvolvedor
-    error_log("Erro ao processar comentário: " . $e->getMessage());
-    // Prepara uma mensagem de erro para o usuário
-    $_SESSION['mensagem_erro'] = "Ocorreu um erro ao processar sua solicitação.";
+    if (isset($conexao) && $conexao->ping()) { $conexao->rollback(); }
+    error_log("Erro Crítico em processa_comentario.php: " . $e->getMessage());
+    $_SESSION['mensagem_erro'] = "Ocorreu um erro inesperado. Verifique os logs para mais detalhes.";
+} finally {
+    if (isset($conexao)) { $conexao->close(); }
 }
 
-// O redirecionamento acontece aqui no final, após o try-catch ter sido concluído com sucesso ou falha.
 header("Location: detalhes_chamado.php?id=" . $id_chamado);
 exit();
+?>

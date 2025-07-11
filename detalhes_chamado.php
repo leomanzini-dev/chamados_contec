@@ -1,8 +1,8 @@
 <?php
-// detalhes_chamado.php - VERSÃO FINAL COM LAYOUT ESTRUTURAL CORRIGIDO
+// detalhes_chamado.php (VERSÃO FINAL - ABRIR ANEXOS EM NOVA ABA)
 
 $titulo_pagina = "Detalhes do Chamado";
-$css_pagina = "detalhes_chamado.css"; 
+$css_pagina = "detalhes_chamado.css";
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
@@ -12,13 +12,14 @@ if (!$id_chamado) {
     exit();
 }
 
-$sql_chamado = "SELECT t.*, t.id_chamado_usuario, solicitante.nome_completo AS nome_solicitante, agente.nome_completo AS nome_agente, c.nome AS nome_categoria, p.nome AS nome_prioridade, s.nome AS nome_status 
-                FROM tickets AS t 
-                JOIN usuarios AS solicitante ON t.id_solicitante = solicitante.id 
-                LEFT JOIN usuarios AS agente ON t.id_agente_atribuido = agente.id 
-                JOIN categorias AS c ON t.id_categoria = c.id 
-                JOIN prioridades AS p ON t.id_prioridade = p.id 
-                JOIN status_tickets AS s ON t.id_status = s.id 
+// --- BUSCA DE DADOS DO CHAMADO ---
+$sql_chamado = "SELECT t.*, t.id_chamado_usuario, solicitante.nome_completo AS nome_solicitante, agente.nome_completo AS nome_agente, c.nome AS nome_categoria, p.nome AS nome_prioridade, s.nome AS nome_status
+                FROM tickets AS t
+                JOIN usuarios AS solicitante ON t.id_solicitante = solicitante.id
+                LEFT JOIN usuarios AS agente ON t.id_agente_atribuido = agente.id
+                JOIN categorias AS c ON t.id_categoria = c.id
+                JOIN prioridades AS p ON t.id_prioridade = p.id
+                JOIN status_tickets AS s ON t.id_status = s.id
                 WHERE t.id = ?";
 $stmt = $conexao->prepare($sql_chamado);
 $stmt->bind_param("i", $id_chamado);
@@ -37,6 +38,7 @@ if ($tipo_usuario != 'ti' && $chamado['id_solicitante'] != $id_usuario_logado) {
     exit();
 }
 
+// --- LÓGICA INTELIGENTE DE BUSCA DE COMENTÁRIOS E ANEXOS ---
 $sql_comentarios = "SELECT c.*, u.nome_completo AS nome_usuario FROM comentarios_tickets AS c JOIN usuarios AS u ON c.id_usuario = u.id WHERE c.id_ticket = ? ORDER BY c.data_comentario ASC";
 $stmt_comentarios = $conexao->prepare($sql_comentarios);
 $stmt_comentarios->bind_param("i", $id_chamado);
@@ -44,12 +46,21 @@ $stmt_comentarios->execute();
 $comentarios = $stmt_comentarios->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt_comentarios->close();
 
-$sql_anexos = "SELECT * FROM anexos_tickets WHERE id_ticket = ?";
-$stmt_anexos = $conexao->prepare($sql_anexos);
-$stmt_anexos->bind_param("i", $id_chamado);
-$stmt_anexos->execute();
-$anexos = $stmt_anexos->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt_anexos->close();
+$anexos_gerais = [];
+$anexos_por_comentario = [];
+$sql_anexos_todos = "SELECT * FROM anexos_tickets WHERE id_ticket = ?";
+$stmt_anexos_todos = $conexao->prepare($sql_anexos_todos);
+$stmt_anexos_todos->bind_param("i", $id_chamado);
+$stmt_anexos_todos->execute();
+$resultado_anexos = $stmt_anexos_todos->get_result();
+while ($anexo = $resultado_anexos->fetch_assoc()) {
+    if (is_null($anexo['id_comentario'])) {
+        $anexos_gerais[] = $anexo;
+    } else {
+        $anexos_por_comentario[$anexo['id_comentario']][] = $anexo;
+    }
+}
+$stmt_anexos_todos->close();
 
 $todos_status = [];
 $todos_agentes = [];
@@ -63,12 +74,7 @@ if ($tipo_usuario == 'ti') {
 
 <div class="main-content">
     <div class="main-header">
-        <h1>
-            Detalhes do Chamado #<?php echo htmlspecialchars($chamado['id']); ?>
-            <?php if (isset($chamado['id_chamado_usuario'])): ?>
-                (Seu Chamado Nº <?php echo htmlspecialchars($chamado['id_chamado_usuario']); ?>)
-            <?php endif; ?>
-        </h1>
+        <h1>Detalhes do Chamado #<?php echo htmlspecialchars($chamado['id']); ?></h1>
         <div class="user-menu">
             <span>Olá, <?php echo htmlspecialchars($nome_usuario); ?>!</span>
             <a href="logout.php" class="logout-link">Sair</a>
@@ -76,7 +82,6 @@ if ($tipo_usuario == 'ti') {
     </div>
 
     <div class="content-body">
-
         <?php
         if (isset($_SESSION['mensagem_sucesso'])) {
             $mensagem_js = addslashes(htmlspecialchars($_SESSION['mensagem_sucesso']));
@@ -88,17 +93,11 @@ if ($tipo_usuario == 'ti') {
             echo "<script>showToast('{$mensagem_js}', 'erro');</script>";
             unset($_SESSION['mensagem_erro']);
         }
-        if (isset($_SESSION['mensagem_aviso'])) {
-            $mensagem_js = addslashes(htmlspecialchars($_SESSION['mensagem_aviso']));
-            echo "<script>showToast('{$mensagem_js}', 'aviso');</script>";
-            unset($_SESSION['mensagem_aviso']);
-        }
         ?>
 
         <div class="ticket-layout">
-
             <div class="ticket-main-content">
-
+                
                 <div class="info-chamado">
                     <h2><?php echo htmlspecialchars($chamado['motivo_chamado']); ?></h2>
                     <div class="info-chamado-meta">
@@ -159,13 +158,28 @@ if ($tipo_usuario == 'ti') {
                                 <div class="comentario <?php echo $comentario['interno'] ? 'interno' : ''; ?>">
                                     <div class="comentario-header">
                                         <strong><?php echo htmlspecialchars($comentario['nome_usuario']); ?></strong> comentou em <?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($comentario['data_comentario']))); ?>
-                                        <?php if ($comentario['interno']): ?>
-                                            <span class="tag-interno">INTERNO</span>
-                                        <?php endif; ?>
+                                        <?php if ($comentario['interno']): ?><span class="tag-interno">INTERNO</span><?php endif; ?>
                                     </div>
                                     <div class="comentario-corpo">
                                         <?php echo nl2br(htmlspecialchars($comentario['comentario'])); ?>
                                     </div>
+                                    
+                                    <?php if (isset($anexos_por_comentario[$comentario['id']])): ?>
+                                        <div class="comentario-anexos">
+                                            <strong>Anexos:</strong>
+                                            <ul>
+                                                <?php foreach($anexos_por_comentario[$comentario['id']] as $anexo_comentario): ?>
+                                                    <li>
+                                                        <i class="fa-solid fa-paperclip"></i>
+                                                        <a href="<?php echo htmlspecialchars($anexo_comentario['caminho_arquivo']); ?>" target="_blank" rel="noopener noreferrer">
+                                                            <?php echo htmlspecialchars($anexo_comentario['nome_arquivo_original']); ?>
+                                                        </a>
+                                                        <span class="tamanho-anexo">(<?php echo round($anexo_comentario['tamanho_bytes'] / 1024, 2); ?> KB)</span>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -175,53 +189,59 @@ if ($tipo_usuario == 'ti') {
                 <div class="card-section novo-comentario">
                     <h3>Adicionar Novo Comentário</h3>
                     <div class="card-content">
-                        <form action="processa_comentario.php" method="POST" enctype="multipart/form-data">
-                            <input type="hidden" name="id_chamado" value="<?php echo htmlspecialchars($chamado['id']); ?>">
-                            <textarea name="comentario" rows="5" placeholder="Digite seu comentário aqui..."></textarea>
+                        <form id="form-comentario" action="processa_comentario.php" method="POST" enctype="multipart/form-data">
+                           <input type="hidden" name="id_chamado" value="<?php echo htmlspecialchars($chamado['id']); ?>">
+                           <div class="form-group">
+                                <label for="comentario-texto">Comentário:</label>
+                                <textarea id="comentario-texto" name="comentario" rows="5" placeholder="Digite seu comentário aqui (você pode colar prints com Ctrl+V)..." required></textarea>
+                            </div>
+                            <div id="preview-container-comentario" class="paste-preview-container"></div>
                             <div class="form-group anexo-comentario">
-                                <label for="anexos_comentario">Anexar Arquivos (Opcional)</label>
+                                <label for="anexos_comentario">Anexar Outros Arquivos (opcional):</label>
                                 <input type="file" id="anexos_comentario" name="anexos[]" multiple>
                             </div>
                             <?php if ($tipo_usuario == 'ti'): ?>
-                                <div class="checkbox-interno">
-                                    <input type="checkbox" id="comentario_interno" name="comentario_interno" value="1">
-                                    <label for="comentario_interno">Marcar como comentário interno</label>
-                                </div>
+                                <div class="checkbox-interno"><input type="checkbox" id="comentario_interno" name="comentario_interno" value="1"><label for="comentario_interno">Marcar como comentário interno</label></div>
                             <?php endif; ?>
-                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Enviar Comentário</button>
+                            <div class="action-button">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Enviar Comentário</button>
+                            </div>
                         </form>
                     </div>
                 </div>
-
+                
+                <?php if ($tipo_usuario == 'ti'): ?>
+                <div class="card-section danger-zone">
+                    <h3>Zona de Perigo</h3>
+                    <div class="card-content">
+                        <p>Esta ação é irreversível e excluirá permanentemente o chamado, incluindo todos os seus comentários e anexos.</p>
+                        <button id="btn-abrir-modal-excluir" class="btn btn-danger">Excluir Chamado</button>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
-            <div class="ticket-sidebar">
 
+            <div class="ticket-sidebar">
                 <div class="sidebar-card">
                     <h3>Detalhes</h3>
                     <div class="card-content ticket-details-list">
-                        <div class="detail-item">
-                            <span class="label-status">Status</span>
-                            <p id="detalhes-status" class="status status-<?php echo strtolower(str_replace(' ', '-', $chamado['nome_status'])); ?>"><?php echo htmlspecialchars($chamado['nome_status']); ?></p>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label-prioridade">Prioridade</span>
-                            <p><?php echo htmlspecialchars($chamado['nome_prioridade']); ?></p>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label-categoria">Categoria</span>
-                            <p><?php echo htmlspecialchars($chamado['nome_categoria']); ?></p>
-                        </div>
+                        <div class="detail-item"><span class="label-status">Status</span><p id="detalhes-status" class="status status-<?php echo strtolower(str_replace(' ', '-', $chamado['nome_status'])); ?>"><?php echo htmlspecialchars($chamado['nome_status']); ?></p></div>
+                        <div class="detail-item"><span class="label-prioridade">Prioridade</span><p><?php echo htmlspecialchars($chamado['nome_prioridade']); ?></p></div>
+                        <div class="detail-item"><span class="label-categoria">Categoria</span><p><?php echo htmlspecialchars($chamado['nome_categoria']); ?></p></div>
                     </div>
                 </div>
 
-                <?php if (!empty($anexos)): ?>
+                <?php if (!empty($anexos_gerais)): ?>
                 <div class="sidebar-card anexos-chamado">
-                    <h3>Anexos</h3>
+                    <h3>Anexos da Abertura</h3>
                     <div class="card-content">
                         <ul>
-                            <?php foreach($anexos as $anexo): ?>
+                            <?php foreach($anexos_gerais as $anexo): ?>
                                 <li>
-                                    <a href="<?php echo htmlspecialchars($anexo['caminho_arquivo']); ?>" target="_blank"><?php echo htmlspecialchars($anexo['nome_arquivo_original']); ?></a> 
+                                    <i class="fa-solid fa-paperclip"></i>
+                                    <a href="<?php echo htmlspecialchars($anexo['caminho_arquivo']); ?>" target="_blank" rel="noopener noreferrer">
+                                        <?php echo htmlspecialchars($anexo['nome_arquivo_original']); ?>
+                                    </a>
                                     <span class="tamanho-anexo">(<?php echo round($anexo['tamanho_bytes'] / 1024, 2); ?> KB)</span>
                                 </li>
                             <?php endforeach; ?>
@@ -229,67 +249,61 @@ if ($tipo_usuario == 'ti') {
                     </div>
                 </div>
                 <?php endif; ?>
-
             </div>
-            </div> </div> </div>
-
-<?php
-if($conexao) { $conexao->close(); }
-?>
+        </div>
+    </div>
 </div>
 
+<div id="modal-excluir" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header modal-header-danger">
+            <h2>Confirmar Exclusão Permanente</h2>
+            <span class="modal-close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Você tem certeza absoluta que deseja excluir o chamado <strong>#<?php echo htmlspecialchars($chamado['id']); ?></strong>?</p>
+            <p>Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo:</p>
+            <form id="form-excluir" action="processa_excluir_chamado.php" method="POST">
+                <input type="hidden" name="id_chamado" value="<?php echo htmlspecialchars($chamado['id']); ?>">
+                <input type="text" id="input-confirmacao" autocomplete="off" class="form-control">
+                <div class="action-button">
+                    <button id="btn-confirmar-exclusao" type="submit" class="btn btn-danger" disabled>Sim, excluir permanentemente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<?php if($conexao) { $conexao->close(); } ?>
+</div>
+
+<script src="js/paste-helper.js?v=<?php echo time(); ?>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    document.addEventListener('ws:update_ticket_details', function(event) {
-        const detalhes = event.detail;
-        atualizarDetalhes(detalhes);
-    });
-    document.addEventListener('ws:new_comment_added', function(event) {
-        const comentario = event.detail;
-        adicionarNovoComentario(comentario);
-    });
-    function atualizarDetalhes(detalhes) {
-        if (!detalhes) return;
-        const elStatus = document.getElementById('detalhes-status');
-        const elAgente = document.getElementById('detalhes-agente');
-        const elAtualizacao = document.getElementById('detalhes-ultima-atualizacao');
-        if (elStatus && detalhes.nome_status) {
-            elStatus.innerText = detalhes.nome_status;
-            elStatus.className = 'status status-' + detalhes.nome_status.toLowerCase().replace(/ /g, '-');
+    const btnAbrirModal = document.getElementById('btn-abrir-modal-excluir');
+    const modal = document.getElementById('modal-excluir');
+    if (modal) {
+        const btnFecharModal = modal.querySelector('.modal-close');
+        const inputConfirmacao = document.getElementById('input-confirmacao');
+        const btnConfirmarExclusao = document.getElementById('btn-confirmar-exclusao');
+
+        if (btnAbrirModal) {
+            btnAbrirModal.addEventListener('click', function() { modal.style.display = 'flex'; });
         }
-        if (elAgente && typeof detalhes.nome_agente !== 'undefined') {
-            elAgente.innerHTML = '<strong>Agente Atribuído:</strong> ' + (detalhes.nome_agente ? detalhes.nome_agente : 'Não atribuído');
+        if (btnFecharModal) {
+            btnFecharModal.addEventListener('click', function() { modal.style.display = 'none'; });
         }
-        if (elAtualizacao && detalhes.data_ultima_atualizacao) {
-            const novaData = new Date(detalhes.data_ultima_atualizacao).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            elAtualizacao.innerHTML = '<strong>Última Atualização:</strong> ' + novaData;
+        window.addEventListener('click', function(event) {
+            if (event.target == modal) { modal.style.display = 'none'; }
+        });
+        if (inputConfirmacao && btnConfirmarExclusao) {
+            inputConfirmacao.addEventListener('keyup', function() {
+                btnConfirmarExclusao.disabled = inputConfirmacao.value.trim().toUpperCase() !== 'EXCLUIR';
+            });
         }
     }
-    function adicionarNovoComentario(comentario) {
-        const lista = document.getElementById('lista-comentarios');
-        if (!lista) return;
-        const itemVazio = lista.querySelector('.nenhum-comentario');
-        if (itemVazio) {
-            itemVazio.remove();
-        }
-        const dataFormatada = new Date(comentario.data_comentario).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        const tagInterno = comentario.interno == 1 ? '<span class="tag-interno">INTERNO</span>' : '';
-        const classeInterno = comentario.interno == 1 ? 'interno' : '';
-        const corpoComentario = (comentario.comentario || '').replace(/\n/g, '<br>');
-        const novoComentarioDiv = document.createElement('div');
-        novoComentarioDiv.className = `comentario ${classeInterno}`;
-        novoComentarioDiv.innerHTML = `
-            <div class="comentario-header">
-                <strong>${(comentario.nome_usuario || '')}</strong> comentou em ${dataFormatada}
-                ${tagInterno}
-            </div>
-            <div class="comentario-corpo">
-                ${corpoComentario}
-            </div>
-        `;
-        lista.appendChild(novoComentarioDiv);
-        novoComentarioDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
+    
+    inicializarPasteUpload('comentario-texto', 'preview-container-comentario', 'form-comentario');
 });
 </script>
 

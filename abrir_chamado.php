@@ -1,5 +1,5 @@
 <?php
-// abrir_chamado.php
+// abrir_chamado.php (VERSÃO FINAL COM PASTE-UPLOAD)
 $titulo_pagina = "Abrir Novo Chamado";
 $css_pagina = "formularios.css";
 require_once 'includes/header.php';
@@ -60,12 +60,14 @@ $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE vi
                 </div>
                 
                 <div class="form-group">
-                    <label for="descricao_detalhada">Descrição Detalhada do Problema</label>
+                    <label for="descricao_detalhada">Descrição Detalhada do Problema (você pode colar prints aqui)</label>
                     <textarea id="descricao_detalhada" name="descricao_detalhada" rows="8" required></textarea>
                 </div>
 
+                <div id="preview-container-abrir" class="paste-preview-container"></div>
+
                 <div class="form-group">
-                    <label for="anexos">Anexar Arquivos</label>
+                    <label for="anexos">Anexar Outros Arquivos (opcional)</label>
                     <input type="file" id="anexos" name="anexos[]" multiple>
                 </div>
 
@@ -82,7 +84,7 @@ $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE vi
                 <ul>
                     <li>Use um assunto claro e objetivo.</li>
                     <li>Descreva o problema com o máximo de detalhes possível.</li>
-                    <li>Se houver uma mensagem de erro, anexe um print da tela.</li>
+                    <li>Se houver uma mensagem de erro, cole um print da tela na descrição.</li>
                     <li>Informe os passos que você já tentou para resolver.</li>
                 </ul>
             </div>
@@ -99,7 +101,6 @@ $artigos_populares = $conexao->query("SELECT id, titulo FROM kb_artigos WHERE vi
                 <?php endif; ?>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -120,7 +121,7 @@ if($conexao) {
     $conexao->close();
 }
 ?>
-    </div> </body>
+</div> </body>
 
-<script src="js/abrir_chamado.js"></script>
+<script src="js/abrir_chamado.js?v=<?php echo time(); ?>"></script>
 </html>

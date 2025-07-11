@@ -1,5 +1,5 @@
 /* ======================================================== */
-/* ESTILO FINAL E CRIATIVO PARA A PÁGINA DETALHES_CHAMADO   */
+/* ESTILO FINAL E UNIFICADO PARA A PÁGINA DETALHES_CHAMADO   */
 /* ======================================================== */
 
 /* 1. O Layout Principal de Duas Colunas */
@@ -37,7 +37,7 @@
 .ticket-main-content h3 {
     font-size: 1.3rem;
     color: #334155;
-    margin-top: 0; /* Removido o espaço extra */
+    margin-top: 0;
     margin-bottom: 15px;
 }
 
@@ -49,8 +49,6 @@
     position: sticky; /* Faz a barra lateral "flutuar" ao rolar a página */
     top: 20px;
 }
-
-/* Estilo padrão para os cards da lateral */
 .sidebar-card {
     background-color: #ffffff;
     border: 1px solid #eef2f7;
@@ -72,27 +70,23 @@
     padding: 20px;
 }
 
-/* ======================================================== */
-/* ===== INÍCIO DAS ALTERAÇÕES CRIATIVAS NOS DETALHES ===== */
-/* ======================================================== */
-
 /* Estilizando a lista de detalhes (Status, Prioridade...) */
 .ticket-details-list {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Espaço entre os itens */
+    gap: 15px;
 }
 .detail-item {
     display: flex;
     flex-direction: column;
     padding-bottom: 15px;
-    border-bottom: 1px dashed #dbeafe; /* Linha tracejada sutil */
+    border-bottom: 1px dashed #dbeafe;
 }
 .detail-item:last-child {
     border-bottom: none;
     padding-bottom: 0;
 }
-.detail-item span { /* Label: "Status", "Prioridade"... */
+.detail-item span {
     font-size: 0.8rem;
     color: #64748b;
     font-weight: 500;
@@ -100,9 +94,9 @@
     display: flex;
     align-items: center;
 }
-.detail-item p { /* Valor: "Em Andamento", "Média"... */
-    font-size: 1.1rem; /* Fonte maior para o valor */
-    font-weight: 600;  /* Mais forte */
+.detail-item p {
+    font-size: 1.1rem;
+    font-weight: 600;
     color: #1e293b;
     margin: 0;
 }
@@ -111,7 +105,6 @@
 .detail-item span.label-status::before { content: '\f024'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; color: #6b7280; }
 .detail-item span.label-prioridade::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; color: #f59e0b; }
 .detail-item span.label-categoria::before { content: '\f02c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; color: #3b82f6; }
-
 
 /* Pílula de status */
 .detail-item p.status { 
@@ -130,9 +123,8 @@
 .status-resolvido { background-color: #22c55e; }
 .status-cancelado { background-color: #ef4444; }
 
-
-/* Bloco de Anexos (Mantido o estilo de card com ícones) */
-.anexos-chamado { border-left: 4px solid #3c7275; }
+/* Bloco de Anexos da Abertura */
+.anexos-chamado { border-left: 4px solid #0891b2; } /* Cor ciano */
 .anexos-chamado h3::before { content: '\f0c6'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 10px; }
 .anexos-chamado ul { list-style: none; padding: 0; margin: 0; }
 .anexos-chamado li { margin-bottom: 8px; }
@@ -142,11 +134,212 @@
 .anexos-chamado a::before { content: '\f019'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; }
 .tamanho-anexo { margin-left: 8px; font-size: 0.85em; color: #64748b; }
 
-/* Bloco de Gerenciamento de TI */
-.gerenciamento-ti .form-group { margin-bottom: 15px; }
-.gerenciamento-ti .btn-atualizar { width: 100%; }
-
-/* Histórico e Comentários (sem a caixa externa) */
-.historico-chamado .comentario { border: 1px solid #eef2f7; border-radius: 8px; margin-bottom: 15px; background-color: #ffffff; }
-.historico-chamado .comentario-header { background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #eef2f7; font-size: 0.9em; }
+/* Histórico e Comentários */
+.historico-chamado .comentario { border: 1px solid #eef2f7; border-radius: 8px; margin-bottom: 15px; background-color: #ffffff; overflow: hidden; }
+.historico-chamado .comentario-header { background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #eef2f7; font-size: 0.9em; color: #475569;}
 .historico-chamado .comentario-corpo { padding: 15px; line-height: 1.6; }
+
+/* ======================================================== */
+/* ===== INÍCIO DOS NOVOS ESTILOS PARA AS FUNCIONALIDADES ===== */
+/* ======================================================== */
+
+/* 1. Anexos dentro dos comentários */
+.comentario-anexos {
+    padding: 15px;
+    background-color: #f8fafc; /* Fundo levemente diferente para destacar */
+    border-top: 1px solid #eef2f7;
+}
+.comentario-anexos strong {
+    font-size: 0.9em;
+    color: #475569;
+    margin-bottom: 10px;
+    display: block;
+}
+.comentario-anexos ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.comentario-anexos li {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+.comentario-anexos li:last-child {
+    margin-bottom: 0;
+}
+.comentario-anexos a {
+    color: #0d6efd;
+    text-decoration: none;
+    font-weight: 500;
+}
+.comentario-anexos a:hover {
+    text-decoration: underline;
+}
+.comentario-anexos .fa-paperclip {
+    margin-right: 8px;
+    color: #64748b;
+}
+
+/* 2. Preview de Imagens Coladas (Ctrl+V) */
+.paste-preview-container {
+    display: none; /* Começa oculto */
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px;
+    border: 2px dashed #cbd5e1; /* Borda tracejada mais suave */
+    border-radius: 8px;
+    background-color: #f8fafc;
+}
+.paste-preview-item {
+    position: relative;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.paste-preview-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+}
+.paste-preview-remove {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.paste-preview-remove:hover {
+    background: #ef4444; /* Vermelho no hover */
+}
+
+
+/* 3. Zona de Perigo e Modal de Exclusão */
+.danger-zone {
+    border: 1px solid #fecaca;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    margin-top: 30px;
+    background-color: #fef2f2;
+}
+.danger-zone h3 {
+    font-size: 1rem;
+    background-color: transparent;
+    color: #b91c1c;
+    border-bottom: 1px solid #fecaca;
+    padding: 15px;
+}
+.danger-zone h3::before {
+    content: '\f12a'; /* Ícone de exclamação */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    margin-right: 10px;
+}
+.danger-zone .card-content {
+    padding: 15px;
+    color: #b91c1c;
+}
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.btn-danger:hover {
+    background-color: #dc2626;
+}
+.btn-danger:disabled {
+    background-color: #fca5a5;
+    cursor: not-allowed;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(17, 24, 39, 0.6); /* Fundo mais escuro */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px); /* Efeito de desfoque no fundo */
+}
+.modal-content {
+    background: white;
+    padding: 0;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    animation: slide-down 0.3s ease-out;
+}
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-header-danger {
+    background-color: #dc2626;
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+.modal-close {
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    text-shadow: none;
+    opacity: 0.9;
+}
+.modal-body {
+    padding: 25px;
+    line-height: 1.6;
+}
+#input-confirmacao {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    font-size: 1rem;
+    text-align: center;
+    letter-spacing: 2px;
+}
+#input-confirmacao:focus {
+    border-color: #dc2626;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+@keyframes slide-down {
+    from { transform: translateY(-30px) scale(0.98); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}

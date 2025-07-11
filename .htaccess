@@ -1,0 +1,25 @@
+# --- CONFIGURAÇÃO DE PERMISSÃO ---
+# TENTATIVA DE CORREÇÃO PARA O ERRO 403 FORBIDDEN
+# Esta diretiva diz explicitamente para permitir todas as requisições neste diretório.
+Require all granted
+
+# --- CONFIGURAÇÕES DE DIRETÓRIO E REESCRITA ---
+
+# Ativa o motor de reescrita de URL
+RewriteEngine On
+
+# Proíbe a listagem de arquivos em diretórios
+Options -Indexes
+
+# Define o diretório base do projeto
+RewriteBase /chamados_contec/
+
+# ------ REGRAS DE ROTEAMENTO ------
+
+# CONDIÇÃO: Se a URL solicitada NÃO for um diretório que realmente existe...
+RewriteCond %{REQUEST_FILENAME} !-d
+# CONDIÇÃO: E se a URL solicitada NÃO for um arquivo que realmente existe...
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# REGRA: ...então, envie a requisição para o index.php.
+RewriteRule ^(.*)$ index.php [L,QSA]

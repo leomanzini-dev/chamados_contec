@@ -1,5 +1,5 @@
 <?php
-// atender_chamado.php - VERSÃO FINAL COM NOTIFICAÇÃO COMPLETA
+// atender_chamado.php - VERSÃO CORRIGIDA E ROBUSTA
 
 session_start();
 require_once 'config.php';
@@ -22,12 +22,14 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $id_chamado = intval($_GET['id']);
 $id_agente = $_SESSION['usuario_id'];
 $nome_agente = $_SESSION['usuario_nome'];
+$id_solicitante = null;
 
-$conexao->begin_transaction();
-
+// O bloco try/catch agora protege apenas a parte crítica: a transação do banco de dados.
 try {
-    // Busca informações essenciais do ticket
-    $stmt_info = $conexao->prepare("SELECT id_solicitante FROM tickets WHERE id = ?");
+    $conexao->begin_transaction();
+
+    // Busca o id_solicitante para uso posterior
+    $stmt_info = $conexao->prepare("SELECT id_solicitante FROM tickets WHERE id = ? FOR UPDATE"); // FOR UPDATE para travar a linha
     $stmt_info->bind_param("i", $id_chamado);
     $stmt_info->execute();
     $ticket_info = $stmt_info->get_result()->fetch_assoc();
@@ -44,7 +46,7 @@ try {
     $stmt_update->execute();
 
     if ($stmt_update->affected_rows === 0) {
-        $_SESSION['mensagem_aviso'] = "Este chamado já foi atribuído a outro agente.";
+        $_SESSION['mensagem_aviso'] = "Este chamado já foi atendido por outro agente.";
         $conexao->rollback();
         header('Location: painel.php');
         exit();
@@ -53,7 +55,7 @@ try {
 
     // 2. INSERE REGISTRO NO HISTÓRICO E NOTIFICAÇÃO NO BANCO
     $comentario_sistema = "Chamado atribuído ao agente " . htmlspecialchars($nome_agente) . " e status alterado para 'Em Andamento'.";
-    $stmt_comentario = $conexao->prepare("INSERT INTO comentarios_tickets (id_ticket, id_usuario, comentario) VALUES (?, ?, ?)");
+    $stmt_comentario = $conexao->prepare("INSERT INTO comentarios_tickets (id_ticket, id_usuario, comentario, interno) VALUES (?, ?, ?, 1)");
     $stmt_comentario->bind_param("iis", $id_chamado, $id_agente, $comentario_sistema);
     $stmt_comentario->execute();
     $stmt_comentario->close();
@@ -64,20 +66,34 @@ try {
     $stmt_notificacao->execute();
     $stmt_notificacao->close();
 
-    // 3. SALVA TUDO NO BANCO
+    // 3. SE TUDO DEU CERTO, SALVA NO BANCO
     $conexao->commit();
 
-    // 4. ENVIA AS NOTIFICAÇÕES EM TEMPO REAL
-    // Envia Push
-    enviar_notificacao_push($conexao, [$id_solicitante], $id_chamado, "Seu chamado está em andamento!", $mensagem_notificacao, 'chamado-' . $id_chamado);
+} catch (Exception $e) {
+    if ($conexao) $conexao->rollback();
+    error_log("Erro na transação de atendimento de chamado: " . $e->getMessage());
+    $_SESSION['mensagem_erro'] = "Ocorreu um erro crítico de banco de dados ao tentar atender o chamado.";
+    header('Location: painel.php');
+    exit();
+}
 
-    // Envia sinal para o painel do TI (para remover o chamado da lista de não atribuídos)
+// =================================================================================
+// 4. ENVIA NOTIFICAÇÕES (APÓS o sucesso do banco de dados)
+// Uma falha aqui não irá mais reverter a operação ou mostrar um erro crítico para o usuário.
+// =================================================================================
+try {
+    if ($id_solicitante) { // Garante que temos um destinatário
+        // Envia Push
+        enviar_notificacao_push($conexao, [$id_solicitante], $id_chamado, "Seu chamado está em andamento!", $mensagem_notificacao, 'chamado-' . $id_chamado);
+        
+        // Envia sinal para o painel do colaborador
+        enviar_para_usuario($id_solicitante, ['type' => 'refresh_dashboard']);
+    }
+
+    // Envia sinal para o painel do TI (para remover o chamado da lista de não atribuídos e atualizar a lista de "meus chamados")
     enviar_para_topico('dashboard-ti', ['type' => 'refresh_dashboard']);
 
-    // Envia sinal para o painel do colaborador
-    enviar_para_usuario($id_solicitante, ['type' => 'refresh_dashboard']);
-
-    // Envia atualização para a página de detalhes do chamado
+    // Envia atualização para a página de detalhes do chamado (se alguém estiver com ela aberta)
     $sql_dados_ws = "SELECT t.data_ultima_atualizacao, agente.nome_completo AS nome_agente, s.nome AS nome_status FROM tickets t LEFT JOIN usuarios agente ON t.id_agente_atribuido = agente.id JOIN status_tickets s ON t.id_status = s.id WHERE t.id = ?";
     $stmt_ws = $conexao->prepare($sql_dados_ws);
     $stmt_ws->bind_param("i", $id_chamado);
@@ -87,16 +103,15 @@ try {
     if($dados_para_ws) {
         enviar_para_topico("chamado-{$id_chamado}", ['type' => 'update_ticket_details', 'payload' => $dados_para_ws]);
     }
-    
-    $_SESSION['mensagem_sucesso'] = "Chamado #" . $id_chamado . " atribuído a você com sucesso!";
-    header('Location: detalhes_chamado.php?id=' . $id_chamado);
-    exit();
-
 } catch (Exception $e) {
-    $conexao->rollback();
-    error_log("Erro na transação de atendimento de chamado: " . $e->getMessage());
-    $_SESSION['mensagem_erro'] = "Ocorreu um erro crítico ao tentar atender o chamado.";
-    header('Location: painel.php');
-    exit();
+    // Se uma notificação falhar, apenas registre o erro para o administrador ver.
+    // Não mostre um erro para o usuário, pois a ação principal funcionou.
+    error_log("Falha ao enviar notificação para atendimento do chamado #" . $id_chamado . ": " . $e->getMessage());
 }
-?>
+
+// 5. REDIRECIONAMENTO DE SUCESSO
+// Como a operação do banco de dados foi um sucesso, o usuário é redirecionado com uma mensagem de sucesso.
+// É uma experiência melhor redirecioná-lo para a página de detalhes do chamado que ele acabou de atender.
+$_SESSION['mensagem_sucesso'] = "Chamado #" . $id_chamado . " atribuído a você com sucesso!";
+header('Location: detalhes_chamado.php?id=' . $id_chamado);
+exit();

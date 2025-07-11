@@ -1,11 +1,11 @@
 <?php
-// gerenciar_chamados.php
+// gerenciar_chamados.php (VERSÃO COM BOTÃO E ANIMAÇÃO SUAVE)
+
 $titulo_pagina = "Gerenciar Todos os Chamados";
-$css_pagina = "tabelas.css"; // Garante que o CSS da tabela é carregado
+$css_pagina = "tabelas.css"; 
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
-// Apenas usuários 'ti' podem acessar
 if ($tipo_usuario != 'ti') {
     header("Location: painel.php");
     exit();
@@ -17,7 +17,6 @@ $filtro_prioridade = filter_input(INPUT_GET, 'prioridade', FILTER_VALIDATE_INT);
 $filtro_agente = filter_input(INPUT_GET, 'agente', FILTER_VALIDATE_INT);
 $filtro_busca = trim(filter_input(INPUT_GET, 'busca', FILTER_SANITIZE_STRING));
 
-// Monta a consulta SQL dinamicamente
 $sql = "SELECT 
             t.id, t.motivo_chamado, t.data_ultima_atualizacao,
             c.nome AS nome_categoria, p.nome AS nome_prioridade, s.nome AS nome_status,
@@ -58,7 +57,6 @@ if ($stmt) {
     $chamados = [];
 }
 
-// Buscar dados para preencher os dropdowns dos filtros
 $todos_status = $conexao->query("SELECT id, nome FROM status_tickets ORDER BY nome")->fetch_all(MYSQLI_ASSOC);
 $todas_prioridades = $conexao->query("SELECT id, nome FROM prioridades ORDER BY nome")->fetch_all(MYSQLI_ASSOC);
 $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE tipo_usuario = 'ti' ORDER BY nome_completo")->fetch_all(MYSQLI_ASSOC);
@@ -68,32 +66,7 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
     <div class="main-header">
         <h1><?php echo $titulo_pagina; ?></h1>
         <div class="user-menu">
-            <div class="notificacao-sino">
-                <i class="fa-solid fa-bell"></i>
-                <span class="contador" id="contador-notificacoes" style="<?php echo (!isset($total_nao_lidas) || $total_nao_lidas == 0) ? 'display: none;' : ''; ?>"><?php echo $total_nao_lidas ?? 0; ?></span>
-                <div class="notificacoes-dropdown">
-                    <div class="notificacoes-header">Notificações</div>
-                    <div class="notificacoes-body" id="notificacoes-body">
-                         <?php if (empty($lista_notificacoes)): ?>
-                            <div class="notificacao-item"><div class="mensagem">Nenhuma notificação nova.</div></div>
-                        <?php else: ?>
-                            <?php foreach ($lista_notificacoes as $notif): ?>
-                                <a href="detalhes_chamado.php?id=<?php echo $notif['id_ticket']; ?>" class="notificacao-item">
-                                    <div class="icon"><i class="fa-solid fa-ticket"></i></div>
-                                    <div>
-                                        <div class="mensagem"><?php echo htmlspecialchars($notif['mensagem']); ?></div>
-                                        <div class="data"><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($notif['data_criacao']))); ?></div>
-                                    </div>
-                                </a>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                    <div class="notificacoes-footer"><a href="notificacoes.php">Ver todas as notificações</a></div>
-                </div>
-            </div>
-            <span>Olá, <?php echo htmlspecialchars($nome_usuario); ?>!</span>
-            <a href="logout.php" class="logout-link">Sair</a>
-        </div>
+           </div>
     </div>
 
     <div class="filtros-container">
@@ -141,8 +114,8 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
                     </select>
                 </div>
                 <div class="filtro-botoes">
-                    <button type="submit" class="btn-filtrar">Filtrar</button>
-                    <a href="gerenciar_chamados.php" class="btn-limpar">Limpar</a>
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="gerenciar_chamados.php" class="btn btn-secondary">Limpar Filtros</a>
                 </div>
             </form>
         </div>
@@ -150,20 +123,7 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
     
     <div class="table-container">
         <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Nº</th>
-                    <th>Assunto</th>
-                    <th>Solicitante</th>
-                    <th>Agente</th>
-                    <th>Categoria</th>
-                    <th>Prioridade</th>
-                    <th>Status</th>
-                    <th>Última Atualização</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="tabela-gerenciar-corpo">
+            <tbody>
                 <?php if (empty($chamados)): ?>
                     <tr>
                         <td colspan="9" class="nenhum-chamado">Nenhum chamado encontrado com os filtros aplicados.</td>
@@ -171,22 +131,7 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
                 <?php else: ?>
                     <?php foreach ($chamados as $chamado): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($chamado['id']); ?></td>
-                            <td><?php echo htmlspecialchars($chamado['motivo_chamado']); ?></td>
-                            <td><?php echo htmlspecialchars($chamado['nome_solicitante']); ?></td>
-                            <td><?php echo $chamado['nome_agente'] ? htmlspecialchars($chamado['nome_agente']) : '<em>Não atribuído</em>'; ?></td>
-                            <td><?php echo htmlspecialchars($chamado['nome_categoria']); ?></td>
-                            <td><?php echo htmlspecialchars($chamado['nome_prioridade']); ?></td>
-                            <td>
-                                <span class="status status-<?php echo strtolower(str_replace(' ', '-', $chamado['nome_status'])); ?>">
-                                    <?php echo htmlspecialchars($chamado['nome_status']); ?>
-                                </span>
-                            </td>
-                            <td><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($chamado['data_ultima_atualizacao']))); ?></td>
-                            <td>
-                                <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn-acao">Ver Detalhes</a>
-                            </td>
-                        </tr>
+                            </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
@@ -196,17 +141,25 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Uma forma simples de manter esta página atualizada:
-    // Quando uma notificação para o painel de TI chegar, recarregamos a página para refletir as mudanças.
-    // Uma implementação mais avançada poderia refazer a busca via AJAX.
-    document.addEventListener('ws:dashboard_new_ticket', function(event) {
-        console.log('Novo chamado recebido, atualizando a lista...');
-        location.reload(); 
-    });
-    document.addEventListener('ws:update_ticket_details', function(event) {
-        console.log('Status de chamado alterado, atualizando a lista...');
-        location.reload();
-    });
+    // ESTE É O SCRIPT RESPONSÁVEL APENAS PELA ANIMAÇÃO DE ABRIR/FECHAR
+    const filtroContainer = document.querySelector('.filtros-container');
+    const filtroHeader = document.querySelector('.filtros-header');
+
+    if (filtroHeader && filtroContainer) {
+        // Verifica se o filtro estava aberto ou fechado (usando localStorage)
+        const filtroAberto = localStorage.getItem('filtroAberto') === 'true';
+        if (filtroAberto) {
+            filtroContainer.classList.add('aberto');
+        }
+
+        filtroHeader.addEventListener('click', function() {
+            // Adiciona ou remove a classe 'aberto' no container principal
+            filtroContainer.classList.toggle('aberto');
+            // Salva o estado (aberto/fechado) no localStorage
+            localStorage.setItem('filtroAberto', filtroContainer.classList.contains('aberto'));
+        });
+    }
+    // O SCRIPT DE FILTRO AUTOMÁTICO FOI REMOVIDO
 });
 </script>
 
