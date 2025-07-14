@@ -1,6 +1,5 @@
 <?php
-// gerenciar_chamados.php (VERSÃO COM BOTÃO E ANIMAÇÃO SUAVE)
-
+// gerenciar_chamados.php (VERSÃO FINAL E FUNCIONAL)
 $titulo_pagina = "Gerenciar Todos os Chamados";
 $css_pagina = "tabelas.css"; 
 require_once 'includes/header.php';
@@ -65,8 +64,6 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
 <div class="main-content">
     <div class="main-header">
         <h1><?php echo $titulo_pagina; ?></h1>
-        <div class="user-menu">
-           </div>
     </div>
 
     <div class="filtros-container">
@@ -85,9 +82,7 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
                     <select name="status" id="status">
                         <option value="">Todos</option>
                         <?php foreach($todos_status as $status): ?>
-                            <option value="<?php echo $status['id']; ?>" <?php echo ($filtro_status == $status['id']) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($status['nome']); ?>
-                            </option>
+                            <option value="<?php echo $status['id']; ?>" <?php echo ($filtro_status == $status['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($status['nome']); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -96,9 +91,7 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
                     <select name="prioridade" id="prioridade">
                         <option value="">Todas</option>
                         <?php foreach($todas_prioridades as $prio): ?>
-                            <option value="<?php echo $prio['id']; ?>" <?php echo ($filtro_prioridade == $prio['id']) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($prio['nome']); ?>
-                            </option>
+                            <option value="<?php echo $prio['id']; ?>" <?php echo ($filtro_prioridade == $prio['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($prio['nome']); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -107,15 +100,13 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
                     <select name="agente" id="agente">
                         <option value="">Todos</option>
                         <?php foreach($todos_agentes as $agente): ?>
-                            <option value="<?php echo $agente['id']; ?>" <?php echo ($filtro_agente == $agente['id']) ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($agente['nome_completo']); ?>
-                            </option>
+                            <option value="<?php echo $agente['id']; ?>" <?php echo ($filtro_agente == $agente['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($agente['nome_completo']); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="filtro-botoes">
                     <button type="submit" class="btn btn-primary">Filtrar</button>
-                    <a href="gerenciar_chamados.php" class="btn btn-secondary">Limpar Filtros</a>
+                    <button type="reset" class="btn btn-secondary" onclick="window.location.href='gerenciar_chamados.php'">Limpar</button>
                 </div>
             </form>
         </div>
@@ -123,6 +114,19 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
     
     <div class="table-container">
         <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Assunto</th>
+                    <th>Solicitante</th>
+                    <th>Agente</th>
+                    <th>Categoria</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                    <th>Última Atualização</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
             <tbody>
                 <?php if (empty($chamados)): ?>
                     <tr>
@@ -131,7 +135,22 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
                 <?php else: ?>
                     <?php foreach ($chamados as $chamado): ?>
                         <tr>
-                            </tr>
+                            <td><?php echo htmlspecialchars($chamado['id']); ?></td>
+                            <td><?php echo htmlspecialchars($chamado['motivo_chamado']); ?></td>
+                            <td><?php echo htmlspecialchars($chamado['nome_solicitante']); ?></td>
+                            <td><?php echo $chamado['nome_agente'] ? htmlspecialchars($chamado['nome_agente']) : '<em>Não atribuído</em>'; ?></td>
+                            <td><?php echo htmlspecialchars($chamado['nome_categoria']); ?></td>
+                            <td><?php echo htmlspecialchars($chamado['nome_prioridade']); ?></td>
+                            <td>
+                                <span class="status status-<?php echo strtolower(str_replace(' ', '-', $chamado['nome_status'])); ?>">
+                                    <?php echo htmlspecialchars($chamado['nome_status']); ?>
+                                </span>
+                            </td>
+                            <td><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($chamado['data_ultima_atualizacao']))); ?></td>
+                            <td>
+                                <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn-acao">Ver Detalhes</a>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
@@ -141,25 +160,19 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ESTE É O SCRIPT RESPONSÁVEL APENAS PELA ANIMAÇÃO DE ABRIR/FECHAR
     const filtroContainer = document.querySelector('.filtros-container');
     const filtroHeader = document.querySelector('.filtros-header');
 
     if (filtroHeader && filtroContainer) {
-        // Verifica se o filtro estava aberto ou fechado (usando localStorage)
         const filtroAberto = localStorage.getItem('filtroAberto') === 'true';
         if (filtroAberto) {
             filtroContainer.classList.add('aberto');
         }
-
         filtroHeader.addEventListener('click', function() {
-            // Adiciona ou remove a classe 'aberto' no container principal
             filtroContainer.classList.toggle('aberto');
-            // Salva o estado (aberto/fechado) no localStorage
             localStorage.setItem('filtroAberto', filtroContainer.classList.contains('aberto'));
         });
     }
-    // O SCRIPT DE FILTRO AUTOMÁTICO FOI REMOVIDO
 });
 </script>
 
