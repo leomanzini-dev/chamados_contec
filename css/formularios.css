@@ -311,3 +311,24 @@
     color: #555;
     font-size: 1.1rem;
 }
+
+/* ===================================== */
+/* ===== ANIMAÇÃO PARA BOTÕES PRIMÁRIOS ===== */
+/* ===================================== */
+
+.btn.btn-primary {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.btn.btn-primary i {
+    transition: transform 0.2s ease-out;
+}
+
+.btn.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn.btn-primary:hover i {
+    transform: rotate(15deg);
+}

@@ -82,7 +82,7 @@ sort($departamentos); // Opcional: ordena a lista em ordem alfabética
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn-submit">Salvar Usuário</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Salvar Usuário</button>
                 <a href="admin_usuarios.php" class="btn-cancelar">Cancelar</a>
             </div>
         </form>

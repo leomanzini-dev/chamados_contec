@@ -1,11 +1,17 @@
 <?php
-// admin_kb.php
+// admin_kb.php (VERSÃO FINAL E CORRIGIDA)
 $titulo_pagina = "Base de Conhecimento";
-$css_pagina = "admin.css"; // Usa o novo ficheiro CSS
+$css_pagina = "admin.css"; // Reutiliza o CSS de administração
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
-// Lógica PHP para buscar os artigos, já corrigida
+// Apenas usuários 'ti' podem acessar esta página
+if ($tipo_usuario != 'ti') {
+    header("Location: painel.php");
+    exit();
+}
+
+// Lógica PHP para buscar os artigos
 $sql = "SELECT 
             a.id, 
             a.titulo, 
@@ -21,7 +27,7 @@ $artigos = $resultado->fetch_all(MYSQLI_ASSOC);
 <div class="main-content">
     <div class="admin-header">
         <h1><?php echo $titulo_pagina; ?></h1>
-        <a href="adicionar_artigo.php" class="btn-add-new">
+        <a href="adicionar_artigo.php" class="btn btn-primary">
             <i class="fa-solid fa-plus"></i>
             Adicionar Novo Artigo
         </a>
@@ -54,7 +60,7 @@ $artigos = $resultado->fetch_all(MYSQLI_ASSOC);
                                         <a href="editar_artigo.php?id=<?php echo $artigo['id']; ?>" class="btn-action edit" title="Editar">
                                             <i class="fa-solid fa-pencil"></i>
                                         </a>
-                                         <a href="excluir_artigo.php?id=<?php echo $artigo['id']; ?>" class="btn-action delete" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir este artigo?');">
+                                        <a href="excluir_artigo.php?id=<?php echo $artigo['id']; ?>" class="btn-action delete" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir este artigo?');">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </a>
                                     </div>
@@ -67,3 +73,10 @@ $artigos = $resultado->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
 </div>
+
+<?php
+// Fecha a conexão com o banco de dados
+if($conexao) { $conexao->close(); }
+?>
+</div> </body>
+</html>

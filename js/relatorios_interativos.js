@@ -51,33 +51,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 // Atualiza o gráfico de Categoria
-                const ctxCategoria = document.getElementById('graficoCategoria').getContext('2d');
-                if (graficoCategoriaInstance) {
-                    graficoCategoriaInstance.destroy();
-                }
-                graficoCategoriaInstance = new Chart(ctxCategoria, {
-                    type: 'bar',
-                    data: {
-                        labels: data.graficoCategoria.labels,
-                        datasets: [{
-                            label: 'Nº de Chamados',
-                            data: data.graficoCategoria.dados,
-                            backgroundColor: '#3C6E71', // Usando sua cor principal
-                            borderColor: '#284B63',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y', // Deixa as barras na horizontal
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false // Não precisa de legenda para um único dataset
-                            }
+                // Atualiza o gráfico de Categoria
+const ctxCategoria = document.getElementById('graficoCategoria').getContext('2d');
+if (graficoCategoriaInstance) {
+    graficoCategoriaInstance.destroy();
+}
+graficoCategoriaInstance = new Chart(ctxCategoria, {
+    type: 'bar',
+    data: {
+        labels: data.graficoCategoria.labels,
+        datasets: [{
+            label: 'Nº de Chamados',
+            data: data.graficoCategoria.dados,
+            backgroundColor: '#3C6E71',
+            borderColor: '#284B63',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y', 
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false 
+            }
+        },
+        // ===== INÍCIO DA CORREÇÃO =====
+        scales: {
+            x: { // Eixo X (horizontal, onde ficam os valores)
+                beginAtZero: true, // Garante que o eixo comece no zero
+                ticks: {
+                    // Força o intervalo do eixo a ser de 1 em 1
+                    stepSize: 1,
+                    
+                    // Garante que apenas números inteiros sejam exibidos no eixo
+                    callback: function(value) {
+                        if (Math.floor(value) === value) {
+                            return value;
                         }
                     }
-                });
+                }
+            }
+        }
+        // ===== FIM DA CORREÇÃO =====
+    }
+});
             })
             .catch(error => {
                 console.error('Erro ao buscar dados do relatório:', error);
