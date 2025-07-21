@@ -1,5 +1,5 @@
 <?php
-// gerenciar_chamados.php (VERSÃO FINAL E FUNCIONAL)
+// gerenciar_chamados.php (VERSÃO FINAL COM BOTÃO DE DESTAQUE)
 $titulo_pagina = "Gerenciar Todos os Chamados";
 $css_pagina = "tabelas.css"; 
 require_once 'includes/header.php';
@@ -148,7 +148,18 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
                             </td>
                             <td><?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($chamado['data_ultima_atualizacao']))); ?></td>
                             <td>
-                                <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn-acao">Ver Detalhes</a>
+                                <div class="actions-cell">
+                                    <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn btn-view-details" title="Ver Detalhes">
+                                        <i class="fa-solid fa-eye"></i>
+                                        <span>Ver</span>
+                                    </a>
+                                    <button type="button" class="btn btn-action delete btn-excluir" title="Excluir Chamado"
+                                            data-id="<?php echo $chamado['id']; ?>" 
+                                            data-nome="Chamado Nº <?php echo $chamado['id']; ?>"
+                                            data-tipo="chamado">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -157,6 +168,29 @@ $todos_agentes = $conexao->query("SELECT id, nome_completo FROM usuarios WHERE t
         </table>
     </div>
 </div>
+
+<div id="modal-confirmacao" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Confirmar Exclusão</h3>
+            <button id="modal-fechar" class="modal-close-btn">&times;</button>
+        </div>
+        <form id="form-excluir-generico" method="POST">
+            <div class="modal-body">
+                <p id="modal-mensagem"></p>
+                <p style="margin-top: 15px;">Para confirmar esta ação, digite <strong>EXCLUIR</strong> no campo abaixo:</p>
+                <input type="hidden" name="id" id="id-excluir-hidden">
+                <input type="text" id="input-confirmacao-generico" autocomplete="off" style="margin-top: 5px;">
+            </div>
+            <div class="modal-footer">
+                <button id="modal-cancelar" type="button" class="btn btn-secondary">Cancelar</button>
+                <button id="modal-confirmar-submit" type="submit" class="btn btn-danger" disabled>Confirmar Exclusão</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="js/modal_exclusao.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

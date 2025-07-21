@@ -6,7 +6,7 @@ define('PROJECT_ROOT_PATH', __DIR__);
 
 // ===== ATUALIZAÇÃO DA URL PÚBLICA =====
 // O endereço PÚBLICO completo do seu sistema.
-define('APP_URL', 'https://640d6541ba22.ngrok-free.app/chamados_contec');
+define('APP_URL', 'https://91a3522ae0b7.ngrok-free.app/chamados_contec');
 
 
 // --- Suas chaves VAPID (Mantidas, mas não são mais usadas para e-mail) ---

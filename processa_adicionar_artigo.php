@@ -1,13 +1,13 @@
 <?php
-// processa_adicionar_artigo.php
+// processa_adicionar_artigo.php (VERSÃO CORRIGIDA PARA NOTIFICAÇÕES TOAST)
 session_start();
 require_once 'config.php';
 require_once PROJECT_ROOT_PATH . '/conexao.php';
 
 // Apenas usuários 'ti' podem executar esta ação
 if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] != 'ti') {
-    $_SESSION['form_message_type'] = 'error';
-    $_SESSION['form_message'] = "Acesso negado.";
+    // ATUALIZADO: Usando o novo sistema de notificação
+    $_SESSION['mensagem_erro'] = "Acesso negado.";
     header("Location: admin_kb.php");
     exit();
 }
@@ -17,14 +17,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // 1. Coletar e validar os dados do formulário
     $titulo = trim($_POST['titulo']);
-    $conteudo = trim($_POST['conteudo']); // O HTML será permitido, mas sanitizado na exibição
+    $conteudo = trim($_POST['conteudo']);
     $id_categoria = filter_input(INPUT_POST, 'id_categoria', FILTER_VALIDATE_INT);
-    $id_autor = $_SESSION['usuario_id']; // O autor é o usuário de TI logado
+    $id_autor = $_SESSION['usuario_id'];
 
     // Validação básica
     if (empty($titulo) || empty($conteudo) || !$id_categoria) {
-        $_SESSION['form_message_type'] = 'error';
-        $_SESSION['form_message'] = "Erro: Título, conteúdo e categoria são obrigatórios.";
+        // ATUALIZADO: Usando o novo sistema de notificação
+        $_SESSION['mensagem_erro'] = "Erro: Título, conteúdo e categoria são obrigatórios.";
         header("Location: adicionar_artigo.php");
         exit();
     }
@@ -36,14 +36,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if ($stmt_insert->execute()) {
         // Sucesso!
-        $_SESSION['form_message_type'] = 'success';
-        $_SESSION['form_message'] = "Artigo '" . htmlspecialchars($titulo) . "' adicionado com sucesso!";
+        // ATUALIZADO: Usando o novo sistema de notificação
+        $_SESSION['mensagem_sucesso'] = "Artigo '" . htmlspecialchars($titulo) . "' adicionado com sucesso!";
         header("Location: admin_kb.php"); // Redireciona para a lista de artigos
         exit();
     } else {
         // Falha na inserção
-        $_SESSION['form_message_type'] = 'error';
-        $_SESSION['form_message'] = "Erro ao salvar o artigo no banco de dados.";
+        // ATUALIZADO: Usando o novo sistema de notificação
+        $_SESSION['mensagem_erro'] = "Erro ao salvar o artigo no banco de dados.";
         header("Location: adicionar_artigo.php");
         exit();
     }

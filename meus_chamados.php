@@ -1,8 +1,8 @@
 <?php
-// meus_chamados.php
+// meus_chamados.php (VERSÃO FINAL E PADRONIZADA)
 
 $titulo_pagina = "Meus Chamados";
-$css_pagina = "tabelas.css"; // Continua carregando o seu CSS
+$css_pagina = "tabelas.css"; // Continua carregando o seu CSS de tabelas
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
@@ -19,9 +19,7 @@ if ($stmt = $conexao->prepare($sql)) {
     $stmt->bind_param("i", $id_usuario_logado);
     $stmt->execute();
     $resultado = $stmt->get_result();
-    if ($resultado->num_rows > 0) {
-        $chamados = $resultado->fetch_all(MYSQLI_ASSOC);
-    }
+    $chamados = $resultado->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 }
 ?>
@@ -29,7 +27,6 @@ if ($stmt = $conexao->prepare($sql)) {
 <div class="main-content">
     <div class="main-header">
         <h1><?php echo htmlspecialchars($titulo_pagina); ?></h1>
-
         <a href="abrir_chamado.php" class="btn btn-primary">
             <i class="fa-solid fa-plus"></i> Abrir Novo Chamado
         </a>
@@ -37,8 +34,6 @@ if ($stmt = $conexao->prepare($sql)) {
 
     <div class="content-body">
         <div class="table-container">
-            <h2 style="margin: 0 0 20px 10px;">Seu Histórico de Chamados</h2>
-            
             <table class="data-table">
                 <thead>
                     <tr>
@@ -68,7 +63,12 @@ if ($stmt = $conexao->prepare($sql)) {
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn btn-acao">Ver Detalhes</a>
+                                    <div class="actions-cell">
+                                        <a href="detalhes_chamado.php?id=<?php echo $chamado['id']; ?>" class="btn btn-view-details" title="Ver Detalhes">
+                                            <i class="fa-solid fa-eye"></i>
+                                            <span>Ver</span>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -155,3 +155,18 @@
     display: flex;
     gap: 10px;
 }
+.actions-cell .btn-action.delete {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    /* Garante que a cor do ícone seja herdada corretamente */
+    color: inherit; 
+    /* Alinha verticalmente com os outros ícones, se necessário */
+    vertical-align: middle; 
+}
+
+/* Garante que a cor de fundo não mude ao passar o mouse */
+.actions-cell .btn-action.delete:hover {
+    background-color: transparent;
+}

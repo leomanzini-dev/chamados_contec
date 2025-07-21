@@ -1,5 +1,5 @@
 <?php
-// admin_usuarios.php (VERSÃO FINAL SEM FOOTER)
+// admin_usuarios.php (VERSÃO FINAL COMPLETA COM MODAL SEGURO)
 $titulo_pagina = "Administração de Usuários";
 $css_pagina = "admin.css";
 require_once 'includes/header.php';
@@ -13,23 +13,16 @@ if ($tipo_usuario != 'ti') {
 
 // --- LÓGICA DA BUSCA ---
 $filtro_busca = trim(filter_input(INPUT_GET, 'busca', FILTER_SANITIZE_STRING));
-
-// Monta a consulta SQL dinamicamente
-$sql = "SELECT id, nome_completo, email, departamento, tipo_usuario, ativo 
-        FROM usuarios";
-
+$sql = "SELECT id, nome_completo, email, departamento, tipo_usuario, ativo FROM usuarios";
 $params = [];
 $types = '';
-
 if (!empty($filtro_busca)) {
     $sql .= " WHERE (nome_completo LIKE ? OR email LIKE ? OR departamento LIKE ?)";
     $like_param = "%" . $filtro_busca . "%";
     $params = [$like_param, $like_param, $like_param];
     $types = 'sss';
 }
-
 $sql .= " ORDER BY nome_completo ASC";
-
 $stmt = $conexao->prepare($sql);
 if ($stmt && !empty($params)) {
     $stmt->bind_param($types, ...$params);
@@ -92,20 +85,14 @@ if ($stmt) {
                                 <td><?php echo htmlspecialchars($usuario['departamento']); ?></td>
                                 <td><?php echo ucfirst(htmlspecialchars($usuario['tipo_usuario'])); ?></td>
                                 <td>
-                                    <?php if ($usuario['ativo']): ?>
-                                        <span class="status-pill status-ativo">Ativo</span>
-                                    <?php else: ?>
-                                        <span class="status-pill status-inativo">Inativo</span>
-                                    <?php endif; ?>
+                                    <span class="status-pill <?php echo $usuario['ativo'] ? 'status-ativo' : 'status-inativo'; ?>">
+                                        <?php echo $usuario['ativo'] ? 'Ativo' : 'Inativo'; ?>
+                                    </span>
                                 </td>
                                 <td>
                                     <div class="actions-cell">
-                                        <a href="editar_usuario.php?id=<?php echo $usuario['id']; ?>" class="btn-action edit" title="Editar">
-                                            <i class="fa-solid fa-pencil"></i>
-                                        </a>
-                                        <a href="excluir_usuario.php?id=<?php echo $usuario['id']; ?>" class="btn-action delete" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir este usuário?');">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </a>
+                                        <a href="editar_usuario.php?id=<?php echo $usuario['id']; ?>" class="btn btn-action edit" title="Editar"><i class="fa-solid fa-pencil"></i></a>
+                                        <button type="button" class="btn btn-action delete btn-excluir" title="Excluir" data-id="<?php echo $usuario['id']; ?>" data-nome="<?php echo htmlspecialchars($usuario['nome_completo']); ?>" data-tipo="usuario"><i class="fa-solid fa-trash-can"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -117,10 +104,28 @@ if ($stmt) {
     </div>
 </div>
 
-<?php
-// Fecha a conexão com o banco de dados
-if($conexao) { $conexao->close(); }
-?>
+<div id="modal-confirmacao" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Confirmar Exclusão</h3>
+            <button id="modal-fechar" class="modal-close-btn">&times;</button>
+        </div>
+        <form id="form-excluir-generico" method="POST">
+            <div class="modal-body">
+                <p id="modal-mensagem"></p>
+                <p style="margin-top: 15px;">Para confirmar esta ação, digite <strong>EXCLUIR</strong> no campo abaixo:</p>
+                <input type="hidden" name="id" id="id-excluir-hidden">
+                <input type="text" id="input-confirmacao-generico" autocomplete="off" style="margin-top: 5px;">
+            </div>
+            <div class="modal-footer">
+                <button id="modal-cancelar" type="button" class="btn btn-secondary">Cancelar</button>
+                <button id="modal-confirmar-submit" type="submit" class="btn btn-danger" disabled>Confirmar Exclusão</button>
+            </div>
+        </form>
+    </div>
+</div>
 
+<?php if($conexao) { $conexao->close(); } ?>
+<script src="js/modal_exclusao.js"></script>
 </div> </body>
-</html>
+</html>  

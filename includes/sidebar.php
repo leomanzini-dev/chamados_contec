@@ -45,9 +45,9 @@ $base_path = '/chamados_contec';
                 
                 <?php
                 if (isset($departamento_usuario) && $departamento_usuario == 'Pessoal') {
-                    echo '<li class="' . ($pagina_atual == 'base_conhecimento_dp.php' ? 'active' : '') . '"><a href="' . $base_path . '/faq_dp/base_conhecimento_dp.php" title="Base de Conhecimento DP"><i class="fa-solid fa-book-medical"></i><span class="link-text">Base de Conhecimento DP</span></a></li>';
+                    echo '<li class="' . ($pagina_atual == 'base_conhecimento_dp.php' ? 'active' : '') . '"><a href="' . $base_path . '/faq_dp/base_conhecimento_dp.php" title="FAQ DP"><i class="fa-solid fa-book-medical"></i><span class="link-text">Base de Conhecimento DP</span></a></li>';
                 } else {
-                    echo '<li class="' . ($pagina_atual == 'admin_kb.php' ? 'active' : '') . '"><a href="' . $base_path . '/admin_kb.php" title="Base de Conhecimento"><i class="fa-solid fa-book"></i><span class="link-text">Base de Conhecimento</span></a></li>';
+                    echo '<li class="' . ($pagina_atual == 'admin_kb.php' ? 'active' : '') . '"><a href="' . $base_path . '/admin_kb.php" title="Base de Conhecimento"><i class="fa-solid fa-book"></i><span class="link-text">FAQ</span></a></li>';
                 }
                 ?>
                 

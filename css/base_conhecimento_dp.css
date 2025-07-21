@@ -1,13 +1,4 @@
-/* ========================================================== */
-/* ==   ESTILO CRIATIVO E SOFISTICADO PARA A BASE DE CONHECIMENTO DP   == */
-/* ========================================================== */
-
-/* 1. FONTES E CONFIGURAÇÕES GERAIS */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
-body {
-    background-color: #f7f8fc; /* Um fundo global um pouco mais suave */
-}
+/* css/base_conhecimento_dp.css (VERSÃO FINAL COM BLOCOS DE CATEGORIA) */
 
 .faq-container {
     max-width: 900px;
@@ -21,7 +12,6 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 2. CABEÇALHO E BUSCA */
 .faq-header {
     text-align: center;
     padding: 50px 30px;
@@ -30,6 +20,10 @@ body {
     margin-bottom: 50px;
     border: 1px solid #eef2f7;
     box-shadow: 0 8px 30px rgba(0, 87, 255, 0.05);
+}
+
+.faq-header h2 {
+    color: #32325d;
 }
 
 .faq-header p {
@@ -64,11 +58,6 @@ body {
     border: 1px solid #dee2e6;
     box-shadow: 0 4px 15px rgba(0,0,0,0.06);
     transition: all 0.3s ease;
-    
-    /* Correção para máxima compatibilidade de navegadores */
-    -webkit-appearance: none; /* Para Chrome, Safari, Edge, etc. */
-    -moz-appearance: none;    /* Para Firefox */
-    appearance: none;         /* A versão padrão e moderna */
 }
 
 #faq-search:focus {
@@ -77,57 +66,71 @@ body {
     box-shadow: 0 0 0 4px rgba(94, 114, 228, 0.2), 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* 3. TÍTULOS DE CATEGORIA */
-.category-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #32325d;
-    margin-bottom: 25px;
-    position: relative;
-    padding-left: 20px;
-}
-
-.category-title::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 6px;
-    height: 60%;
-    background-color: #5e72e4;
-    border-radius: 3px;
-}
-
-/* 4. ACORDEÃO DE PERGUNTAS (O GRANDE UPGRADE VISUAL) */
-.faq-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Espaço entre os cards de pergunta */
-}
-
-.faq-item {
+/* ESTILO DOS BLOCOS DE CATEGORIA ("PASTINHAS") */
+.category-block {
     background-color: #ffffff;
     border: 1px solid #eef2f7;
     border-radius: 12px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 20px rgba(0, 87, 255, 0.06);
     transition: all 0.3s ease;
-    overflow: hidden; /* Essencial para a animação do max-height */
 }
-
-.faq-item:hover {
+.category-block:hover {
     transform: translateY(-3px);
     box-shadow: 0 7px 30px rgba(0, 87, 255, 0.1);
 }
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    cursor: pointer;
+    user-select: none;
+}
+.category-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #32325d;
+    margin: 0;
+}
+.category-header .chevron-icon {
+    font-size: 1.2rem;
+    color: #5e72e4;
+    transition: transform 0.4s ease;
+}
+.category-block.active .chevron-icon {
+    transform: rotate(180deg);
+}
+.category-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+    border-top: 1px solid transparent;
+}
+.category-block.active .category-content {
+    max-height: 2000px;
+    padding: 25px;
+    border-top-color: #eef2f7;
+}
 
+/* ACORDEÃO INTERNO DE PERGUNTAS */
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.faq-item {
+    border: 1px solid #eef2f7;
+    border-radius: 10px;
+    background-color: #fafbfe;
+}
 .faq-question {
     width: 100%;
     background: none;
     border: none;
-    padding: 20px 25px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
+    padding: 15px 20px;
+    font-size: 1.05rem;
+    font-weight: 500;
     color: #32325d;
     display: flex;
     justify-content: space-between;
@@ -135,72 +138,52 @@ body {
     cursor: pointer;
     text-align: left;
 }
-
 .faq-question .fa-chevron-down {
-    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Animação elástica */
+    font-size: 0.9rem;
     color: #5e72e4;
-    background-color: #f0f4f8;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
+    transition: transform 0.3s ease;
 }
-
-/* Estado Ativo do Acordeão */
-.faq-item.active {
-    border-color: #5e72e4;
-}
-
 .faq-item.active .faq-question {
     color: #5e72e4;
 }
-
 .faq-item.active .faq-question .fa-chevron-down {
     transform: rotate(180deg);
-    background-color: #5e72e4;
-    color: white;
 }
-
-/* Painel da Resposta */
 .faq-answer {
-    display: grid;
-    grid-template-rows: 0fr; /* Começa com a "gaveta" fechada */
-    transition: grid-template-rows 0.4s ease-in-out, padding 0.4s ease-in-out;
-    color: #525f7f;
-    font-size: 1rem;
-    line-height: 1.8;
-    background-color: #fafbfe;
-    border-top: 1px solid #eef2f7;
-    padding-left: 30px; /* Mantém o padding lateral */
-    padding-right: 30px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
 }
-
+.faq-answer-content {
+    padding: 0 20px 20px 20px;
+}
 .faq-item.active .faq-answer {
-    grid-template-rows: 1fr; /* Abre a "gaveta" para 100% do conteúdo */
-    padding-top: 25px;    /* Adiciona o padding superior e inferior na transição */
-    padding-bottom: 30px;
+    max-height: 500px;
 }
-
-.faq-answer p {
+.faq-answer-content p {
+    padding-top: 15px;
+    border-top: 1px dashed #e2e8f0;
+    line-height: 1.8;
+    color: #525f7f;
     margin: 0;
 }
-
-.faq-answer b {
+.faq-answer-content b {
     color: #32325d;
     font-weight: 600;
 }
-.faq-answer p {
-    overflow: hidden; /* Garante que o texto não "vaze" durante a animação */
-    margin: 0;
-}
 
-#no-results-message {
-    text-align: center;
-    padding: 40px;
-    color: #525f7f;
-    font-size: 1.1rem;
-    display: none;
+.faq-answer-footer {
+    text-align: right;
+    padding-top: 15px;
 }
+.btn-copy {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; font-size: 0.85rem; font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    color: #5e72e4; background-color: #f0f4f8; border: 1px solid transparent;
+    border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+}
+.btn-copy:hover { background-color: #e2e8f0; border-color: #5e72e4; }
+.btn-copy.copiado { background-color: #2dce89; color: white; border-color: #2dce89; }
+
+#no-results-message { display: none; text-align: center; padding: 40px; color: #525f7f; }

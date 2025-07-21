@@ -1,8 +1,3 @@
-/* css/global.css (VERSÃO LIMPA SEM SIDEBAR) */
-
-/* 1. Importação da Fonte e Variáveis de Cor */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
     --cor-principal: #3C6E71;
     --cor-secundaria: #284B63;
@@ -31,18 +26,58 @@ input[type="text"], input[type="email"], input[type="password"], select, textare
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cor-principal); box-shadow: 0 0 0 3px rgba(60, 110, 113, 0.2); }
 
 /* ======================================================== */
-/* SISTEMA DE BOTÕES UNIFICADO E SIMPLIFICADO               */
+/* SISTEMA DE BOTÕES ATUALIZADO E UNIFICADO     */
 /* ======================================================== */
-.btn { padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; text-decoration: none; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease-out; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Classe base para TODOS os botões */
+.btn { 
+    padding: 10px 20px; 
+    border-radius: 8px; 
+    font-size: 0.9rem; 
+    font-weight: 600; 
+    text-decoration: none; 
+    cursor: pointer; 
+    border: 2px solid transparent; 
+    transition: all 0.2s ease-out; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+}
 .btn i { margin-right: 8px; transition: transform 0.3s ease-in-out; }
 .btn:hover { text-decoration: none !important; }
+
+/* NOVO: Estilo de foco para acessibilidade */
+.btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(60, 110, 113, 0.3);
+}
+
+/* Modificadores de cor e estilo */
 .btn-primary { background-color: var(--cor-principal); color: white; border-color: var(--cor-principal); box-shadow: 0 3px 6px rgba(60, 114, 117, 0.25); }
 .btn-primary:hover { background-color: var(--cor-secundaria); border-color: var(--cor-secundaria); transform: translateY(-2px); box-shadow: 0 5px 10px rgba(60, 114, 117, 0.35); }
 .btn-primary:hover i { transform: scale(1.1) rotate(180deg); }
+
 .btn-secondary { background-color: var(--cor-superficie); color: var(--cor-texto-secundario); border-color: var(--cor-borda); }
 .btn-secondary:hover { background-color: #f8fafc; border-color: #cbd5e1; color: var(--cor-texto-principal); }
-.btn-acao { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; text-decoration: none; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease-out; background-color: var(--cor-superficie); color: var(--cor-texto-secundario); border-color: var(--cor-borda); padding: 6px 14px; font-size: 0.85rem; border-radius: 8px; }
-.btn-acao:hover { background-color: #f8fafc; border-color: #cbd5e1; color: var(--cor-texto-principal); text-decoration: none !important; }
+
+.btn.btn-danger { background-color: var(--cor-erro); color: white; }
+.btn.btn-danger:hover { background-color: #c82333; }
+
+/* REATORADO: O botão de ação agora é um modificador do .btn */
+/* Corrigi de .btn-acao para .btn-action para combinar com seu HTML */
+.btn.btn-action {
+    background-color: transparent; /* Fundo transparente por padrão */
+    border-color: transparent;
+    color: var(--cor-texto-secundario);
+    padding: 4px; /* Padding menor, apenas para o ícone */
+    font-size: 1rem;
+}
+.btn.btn-action i { margin-right: 0; } /* Remove margem do ícone */
+.btn.btn-action:hover {
+    background-color: #e2e8f0; /* Fundo sutil ao passar o mouse */
+    color: var(--cor-secundaria);
+    border-color: transparent;
+}
 
 /* ================================================ */
 /* ESTILO CRIATIVO PARA NOTIFICAÇÕES TOAST          */
@@ -110,4 +145,103 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--c
 }
 .paste-preview-remove:hover {
     background: var(--cor-erro);
+}
+/* ================================================= */
+/* ===== ESTILOS PARA O MODAL DE CONFIRMAÇÃO ===== */
+/* ================================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    animation: fadeIn 0.3s;
+}
+
+.modal-card {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 500px;
+    animation: slide-down 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slide-down {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.modal-close-btn {
+    border: none;
+    background: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #888;
+}
+
+.modal-body p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+/* Ajuste de cor para o botão de perigo (se já não existir um) */
+.btn.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.btn.btn-danger:hover {
+    background-color: #c82333;
+}
+/* Estilos para as mensagens de feedback (alertas) */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
 }

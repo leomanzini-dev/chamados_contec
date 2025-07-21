@@ -12,12 +12,14 @@ function criar_corpo_email_comentario($nome_destinatario, $nome_comentarista, $t
     $motivo_chamado = htmlspecialchars($motivo_chamado);
     $texto_comentario_html = nl2br(htmlspecialchars($texto_comentario));
     $ano_atual = date('Y');
+
     $html = <<<HTML
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Novo Comentário no Chamado #{$id_chamado}</title></head><body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;"><table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; margin-top: 20px; background-color: #ffffff; border: 1px solid #dddddd;"><tr><td align="center" style="padding: 20px 0; background-color: #004a91;"><img src="{$url_logo}" alt="Logo Contec" width="150" style="display: block;"></td></tr><tr><td style="padding: 40px 30px;"><h2 style="color: #333333; border-bottom: 2px solid #eeeeee; padding-bottom: 10px;">Novo Comentário no Chamado #{$id_chamado}</h2><p style="font-size: 16px; color: #555555; line-height: 1.5;">Olá, <strong>{$nome_destinatario}</strong>,</p><p style="font-size: 16px; color: #555555; line-height: 1.5;">Um novo comentário foi adicionado por <strong>{$nome_comentarista}</strong> no chamado sobre "<em>{$motivo_chamado}</em>".</p><table border="0" cellpadding="10" cellspacing="0" width="100%" style="background-color: #f9f9f9; border-left: 4px solid #004a91; margin-top: 20px; margin-bottom: 20px;"><tr><td style="font-size: 15px; color: #333333; line-height: 1.6;">{$texto_comentario_html}</td></tr></table><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td align="center" style="padding: 20px 0;"><a href="{$url_chamado}" style="background-color: #28a745; color: #ffffff; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold;">Ver Chamado</a></td></tr></table></td></tr><tr><td align="center" style="padding: 20px 30px; background-color: #333333; color: #ffffff; font-size: 12px;"><p>Esta é uma mensagem automática do Sistema de Chamados Contec.</p><p>&copy; {$ano_atual} Contec. Todos os direitos reservados.</p></td></tr></table></body></html>
 HTML;
     return $html;
 }
+
 
 /**
  * Cria o corpo HTML para um e-mail de notificação de mudança de status.
@@ -37,6 +39,7 @@ HTML;
     return $html;
 }
 
+
 /**
  * Cria o corpo HTML para um e-mail de notificação de novo chamado para a equipe de TI.
  */
@@ -51,5 +54,82 @@ function criar_corpo_email_novo_chamado($nome_agente_ti, $id_chamado, $motivo_ch
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Novo Chamado Aberto: #{$id_chamado}</title></head><body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;"><table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; margin-top: 20px; background-color: #ffffff; border: 1px solid #dddddd;"><tr><td align="center" style="padding: 20px 0; background-color: #004a91;"><img src="{$url_logo}" alt="Logo Contec" width="150" style="display: block;"></td></tr><tr><td style="padding: 40px 30px;"><h2 style="color: #333333; border-bottom: 2px solid #eeeeee; padding-bottom: 10px;">Novo Chamado na Fila: #{$id_chamado}</h2><p style="font-size: 16px; color: #555555; line-height: 1.5;">Olá, <strong>{$nome_agente_ti}</strong>,</p><p style="font-size: 16px; color: #555555; line-height: 1.5;">Um novo chamado foi aberto por <strong>{$nome_solicitante}</strong> e precisa de atenção.</p><table border="0" cellpadding="10" cellspacing="0" width="100%" style="background-color: #f9f9f9; border-left: 4px solid #004a91; margin-top: 20px; margin-bottom: 20px;"><tr><td style="font-size: 15px; color: #333333; line-height: 1.6;"><strong>Motivo:</strong> {$motivo_chamado}</td></tr></table><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td align="center" style="padding: 20px 0;"><a href="{$url_chamado}" style="background-color: #007bff; color: #ffffff; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold;">Atender Chamado</a></td></tr></table></td></tr><tr><td align="center" style="padding: 20px 30px; background-color: #333333; color: #ffffff; font-size: 12px;"><p>Esta é uma mensagem automática do Sistema de Chamados Contec.</p><p>&copy; {$ano_atual} Contec. Todos os direitos reservados.</p></td></tr></table></body></html>
 HTML;
+    return $html;
+}
+
+/**
+ * ====================================================================
+ * NOVA FUNÇÃO: Cria o corpo HTML para a notificação de nota interna.
+ * ====================================================================
+ */
+function criar_corpo_email_nota_interna($nome_destinatario, $nome_autor_comentario, $comentario, $id_chamado, $motivo_chamado) {
+    $url_chamado = APP_URL . '/detalhes_chamado.php?id=' . $id_chamado;
+    $nome_destinatario = htmlspecialchars($nome_destinatario);
+    $nome_autor_comentario = htmlspecialchars($nome_autor_comentario);
+    $motivo_chamado = htmlspecialchars($motivo_chamado);
+    $comentario_formatado = nl2br(htmlspecialchars($comentario));
+    $ano_atual = date('Y');
+
+    $html = <<<HTML
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>[NOTA INTERNA] Chamado #{$id_chamado}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; margin-top: 20px; background-color: #ffffff; border: 1px solid #dddddd;">
+        <tr>
+            <td align="center" style="padding: 15px 0; background-color: #4f46e5;">
+                <h2 style="color: #ffffff; margin:0; font-size: 16px; letter-spacing: 1px; font-weight: 600;">NOTA INTERNA</h2>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 40px 30px;">
+                <h3 style="color: #333333; border-bottom: 2px solid #eeeeee; padding-bottom: 10px;">Nova Nota no Chamado #{$id_chamado}</h3>
+                <p style="font-size: 16px; color: #555555; line-height: 1.5;">Olá, <strong>{$nome_destinatario}</strong>,</p>
+                <p style="font-size: 16px; color: #555555; line-height: 1.5;"><strong>{$nome_autor_comentario}</strong> adicionou uma nota interna visível apenas para a equipe de TI no chamado "<em>{$motivo_chamado}</em>".</p>
+                <table border="0" cellpadding="15" cellspacing="0" width="100%" style="background-color: #f1f5f9; border-left: 4px solid #4f46e5; margin-top: 20px; margin-bottom: 20px;">
+                    <tr>
+                        <td style="font-size: 15px; color: #333333; line-height: 1.6;">{$comentario_formatado}</td>
+                    </tr>
+                </table>
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td align="center" style="padding: 20px 0;">
+                            <a href="{$url_chamado}" style="background-color: #284B63; color: #ffffff; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold;">Ver Chamado</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" style="padding: 20px 30px; background-color: #333333; color: #ffffff; font-size: 12px;">
+                <p>Esta é uma mensagem automática do Sistema de Chamados Contec.</p>
+                <p>&copy; {$ano_atual} Contec. Todos os direitos reservados.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+HTML;
+    return $html;
+}
+/**
+ * Cria o corpo HTML para um e-mail de notificação de atendimento de chamado (status em andamento).
+ */
+function criar_corpo_email_chamado_atendido($nome_destinatario, $id_chamado, $motivo_chamado, $nome_tecnico) {
+    $url_chamado = APP_URL . '/detalhes_chamado.php?id=' . $id_chamado;
+    $url_logo = APP_URL . '/img/logo_contec.png';
+    $nome_destinatario = htmlspecialchars($nome_destinatario);
+    $motivo_chamado = htmlspecialchars($motivo_chamado);
+    $nome_tecnico = htmlspecialchars($nome_tecnico);
+    $ano_atual = date('Y');
+
+    $html = <<<HTML
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Chamado #{$id_chamado} em Atendimento</title></head><body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;"><table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; margin-top: 20px; background-color: #ffffff; border: 1px solid #dddddd;"><tr><td align="center" style="padding: 20px 0; background-color: #004a91;"><img src="{$url_logo}" alt="Logo Contec" width="150" style="display: block;"></td></tr><tr><td style="padding: 40px 30px;"><h2 style="color: #333333; border-bottom: 2px solid #eeeeee; padding-bottom: 10px;">Chamado em Atendimento</h2><p style="font-size: 16px; color: #555555; line-height: 1.5;">Olá, <strong>{$nome_destinatario}</strong>,</p><p style="font-size: 16px; color: #555555; line-height: 1.5;">Seu chamado #{$id_chamado} sobre "<em>{$motivo_chamado}</em>" foi <strong>atendido</strong> e está agora em andamento por <strong>{$nome_tecnico}</strong>.</p><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td align="center" style="padding: 20px 0;"><a href="{$url_chamado}" style="background-color: #007bff; color: #ffffff; padding: 15px 25px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold;">Acompanhar Chamado</a></td></tr></table></td></tr><tr><td align="center" style="padding: 20px 30px; background-color: #333333; color: #ffffff; font-size: 12px;"><p>Esta é uma mensagem automática do Sistema de Chamados Contec.</p><p>&copy; {$ano_atual} Contec. Todos os direitos reservados.</p></td></tr></table></body></html>
+HTML;
+
     return $html;
 }

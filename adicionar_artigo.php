@@ -50,7 +50,7 @@ $categorias = $conexao->query("SELECT id, nome FROM categorias ORDER BY nome ASC
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn-submit">Salvar Artigo</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Salvar Artigo</button>
                 <a href="admin_kb.php" class="btn-cancelar">Cancelar</a>
             </div>
         </form>
@@ -61,6 +61,5 @@ $categorias = $conexao->query("SELECT id, nome FROM categorias ORDER BY nome ASC
 <?php
 $conexao->close();
 ?>
-    </div> <!-- Fecho da .dashboard-container -->
-</body>
+    </div> </body>
 </html>

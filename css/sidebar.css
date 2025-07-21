@@ -1,109 +1,54 @@
-/* css/sidebar.css (VERSÃO FINAL E COMPLETA) */
+/* css/sidebar.css (VERSÃO FINAL COM ALINHAMENTO CORRIGIDO) */
 
-/* Estrutura Principal que envolve a Sidebar e o Conteúdo */
-.dashboard-container {
-    display: flex;
-    min-height: 100vh;
-}
-.main-content {
-    flex-grow: 1;
-    padding: 30px;
-    width: calc(100% - 280px);
-    transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
+/* Estrutura Principal */
+.dashboard-container { display: flex; min-height: 100vh; }
+.main-content { flex-grow: 1; padding: 30px; width: calc(100% - 280px); transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
 
-/* A Sidebar em si (Estado Expandido) */
-.sidebar {
-    width: 280px;
-    background-color: #1e293b;
-    color: #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.2);
-    border-right: 1px solid #334155;
-    flex-shrink: 0;
-}
+/* A Sidebar */
+.sidebar { width: 280px; background-color: #1e293b; color: #e2e8f0; display: flex; flex-direction: column; transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.2); border-right: 1px solid #334155; flex-shrink: 0; }
 
 /* Cabeçalho com Avatar */
-.sidebar-header {
-    padding: 25px;
-    border-bottom: 1px solid #334155;
-}
-.user-profile-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    border-radius: var(--raio-borda);
-    transition: var(--transicao-rapida);
-    height: 50px;
-}
-.user-profile-link:hover {
-    background-color: rgba(255, 255, 255, 0.03);
-}
-.user-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: var(--cor-principal);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 600;
-    flex-shrink: 0;
-    margin-right: 15px;
-    transition: margin 0.3s ease-in-out;
-}
-.user-details {
-    display: flex;
-    flex-direction: column;
-    white-space: nowrap;
-    overflow: hidden;
-}
-.user-name {
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 160px;
-}
-.user-role {
-    color: #94a3b8;
-    font-size: 0.8rem;
-}
+.sidebar-header { padding: 25px; border-bottom: 1px solid #334155; }
+.user-profile-link { display: flex; align-items: center; text-decoration: none; border-radius: 8px; transition: background-color 0.2s ease; height: 50px; justify-content: flex-start; }
+.user-profile-link:hover { background-color: rgba(255, 255, 255, 0.03); }
+.user-avatar { width: 50px; height: 50px; border-radius: 50%; background-color: var(--cor-principal); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 600; flex-shrink: 0; margin-right: 15px; transition: margin 0.3s ease-in-out; }
+.user-details { display: flex; flex-direction: column; white-space: nowrap; overflow: hidden; }
+.user-name { color: white; font-weight: 600; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.user-role { color: #94a3b8; font-size: 0.8rem; }
 
 /* Navegação Principal */
-.sidebar-nav {
-    flex-grow: 1;
-    overflow-y: auto;
-    scrollbar-width: none;
-}
-.sidebar-nav::-webkit-scrollbar {
-    display: none;
-}
-.sidebar-nav ul {
-    list-style: none;
-    padding: 15px 12px;
-    margin: 0;
-}
-.sidebar-nav li {
-    margin-bottom: 5px;
-}
+.sidebar-nav { flex-grow: 1; overflow-y: auto; scrollbar-width: none; }
+.sidebar-nav::-webkit-scrollbar { display: none; }
+.sidebar-nav ul { list-style: none; padding: 15px 12px; margin: 0; }
+.sidebar-nav li { margin-bottom: 5px; }
+
+/* ===== A LÓGICA CORRIGIDA ESTÁ AQUI ===== */
 .sidebar-nav a {
     display: flex;
-    align-items: center;
+    align-items: flex-start;  /* Alinha os itens no topo */
     padding: 12px 15px;
-    height: 48px;
+    min-height: 48px;
+    box-sizing: border-box; /* Garante que o padding não estoure a altura */
     color: #94a3b8;
     font-weight: 500;
     text-decoration: none;
-    border-radius: var(--raio-borda);
+    border-radius: 8px;
     transition: all 0.2s ease;
-    white-space: nowrap;
 }
+.sidebar-nav a i {
+    flex-shrink: 0; /* Impede o ícone de encolher */
+    font-size: 1.1rem;
+    width: 30px;
+    text-align: center;
+    margin-right: 15px;
+    margin-top: 2px; /* Pequeno ajuste para alinhar com a primeira linha do texto */
+}
+.sidebar-nav a .link-text {
+    white-space: normal; /* Permite a quebra de linha */
+    line-height: 1.4;
+}
+/* ========================================= */
+
 .sidebar-nav a:hover {
     background-color: #334155;
     color: white;
@@ -115,65 +60,21 @@
     font-weight: 600;
     box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.3);
 }
-.sidebar-nav a i {
-    font-size: 1.1rem;
-    width: 30px;
-    text-align: center;
-    margin-right: 15px;
-}
 
 /* Botão de Recolher/Expandir */
-.sidebar-toggle-wrapper {
-    padding: 15px;
-    border-top: 1px solid #334155;
-}
-#sidebar-toggle {
-    width: 100%;
-    height: 40px;
-    background: transparent;
-    border: 1px solid #475569;
-    color: #94a3b8;
-    border-radius: var(--raio-borda);
-    cursor: pointer;
-    transition: var(--transicao-rapida);
-}
-#sidebar-toggle:hover {
-    background: #334155;
-    color: white;
-    border-color: #475569;
-}
-#sidebar-toggle i {
-    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
+.sidebar-toggle-wrapper { padding: 15px; border-top: 1px solid #334155; }
+#sidebar-toggle { width: 100%; height: 40px; background: transparent; border: 1px solid #475569; color: #94a3b8; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; }
+#sidebar-toggle:hover { background: #334155; color: white; }
+#sidebar-toggle i { transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
 
 /* Estado Recolhido ("Mini") */
-.sidebar.recolhida {
-    width: 90px;
-}
-.sidebar.recolhida .user-details {
-    opacity: 0;
-    width: 0;
-}
-.sidebar.recolhida .user-avatar {
-    margin-right: 0;
-}
-.sidebar.recolhida .user-profile-link {
-    justify-content: center;
-}
-.sidebar.recolhida .sidebar-nav a {
-    justify-content: center;
-}
-.sidebar.recolhida .sidebar-nav a .link-text {
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
-}
-.sidebar.recolhida .sidebar-nav a i {
-    margin-right: 0;
-}
-.sidebar.recolhida #sidebar-toggle i {
-    transform: rotate(180deg);
-}
-.sidebar.recolhida + .main-content {
-    width: calc(100% - 90px);
-}
+.sidebar.recolhida { width: 90px; }
+.sidebar.recolhida .user-details { display: none; }
+.sidebar.recolhida .user-avatar { margin-right: 0; }
+/* A regra para centralizar o avatar já está aqui e deve funcionar quando o script do sidebar.php for removido */
+.sidebar.recolhida .user-profile-link { justify-content: center; } 
+.sidebar.recolhida .sidebar-nav a { justify-content: center; }
+.sidebar.recolhida .sidebar-nav a .link-text { display: none; }
+.sidebar.recolhida .sidebar-nav a i { margin-right: 0; margin-top: 0; }
+.sidebar.recolhida #sidebar-toggle i { transform: rotate(180deg); }
+.sidebar.recolhida + .main-content { width: calc(100% - 90px); }

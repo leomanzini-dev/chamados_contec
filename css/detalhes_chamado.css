@@ -1,345 +1,178 @@
-/* ======================================================== */
-/* ESTILO FINAL E UNIFICADO PARA A PÁGINA DETALHES_CHAMADO   */
-/* ======================================================== */
+/* css/detalhes_chamado.css (VERSÃO FINAL COM TIMELINE INTELIGENTE) */
 
-/* 1. O Layout Principal de Duas Colunas */
+/* ================================== */
+/* ===== ESTRUTURA E LAYOUT GERAL ===== */
+/* ================================== */
 .ticket-layout {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); /* Coluna principal mais larga */
-    gap: 35px;
-    align-items: start;
+    grid-template-columns: 1fr 340px;
+    gap: 30px;
+    align-items: flex-start;
 }
-
-/* 2. Coluna Principal (Esquerda) - O "Feed" */
 .ticket-main-content {
     display: flex;
     flex-direction: column;
     gap: 30px;
 }
-.ticket-main-content h2 { /* Título do chamado */
-    font-size: 2rem;
-    color: #1e293b;
-    margin-top: 0;
-    margin-bottom: 5px;
-    line-height: 1.2;
-}
-.ticket-main-content .info-chamado-meta { /* Linha com Solicitante, Agente, etc. */
-    color: #64748b;
-    font-size: 0.9rem;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eef2f7;
-    margin-bottom: 25px;
-}
-.ticket-main-content .info-chamado-meta p {
-    margin: 4px 0;
-}
-/* Títulos das seções (Descrição, Histórico, etc.) */
-.ticket-main-content h3 {
-    font-size: 1.3rem;
-    color: #334155;
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
-/* 3. Coluna Lateral (Direita) - Os Cards de Informação */
 .ticket-sidebar {
     display: flex;
     flex-direction: column;
     gap: 25px;
-    position: sticky; /* Faz a barra lateral "flutuar" ao rolar a página */
+    position: sticky;
     top: 20px;
 }
-.sidebar-card {
-    background-color: #ffffff;
-    border: 1px solid #eef2f7;
-    border-radius: 8px;
+.card-section {
+    background-color: var(--cor-superficie);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
 }
-.sidebar-card h3 {
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #475569;
+.card-section h3 {
+    font-size: 1.2rem;
     padding: 15px 20px;
+    border-bottom: 1px solid var(--cor-borda);
     margin: 0;
-    border-bottom: 1px solid #eef2f7;
-    display: flex;
-    align-items: center;
+    color: var(--cor-secundaria);
 }
-.sidebar-card .card-content {
+.card-section .card-content {
     padding: 20px;
 }
 
-/* Estilizando a lista de detalhes (Status, Prioridade...) */
-.ticket-details-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+/* ================================== */
+/* ===== CABEÇALHO DO CHAMADO     ===== */
+/* ================================== */
+.ticket-header-card {
+    background-color: transparent;
+    border: none;
+    padding: 0;
 }
-.detail-item {
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 15px;
-    border-bottom: 1px dashed #dbeafe;
+.ticket-header-card h2 {
+    font-size: 1.9rem;
+    color: var(--cor-secundaria);
+    margin: 0 0 8px 0;
+    line-height: 1.3;
 }
-.detail-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+.ticket-header-card .meta-info {
+    font-size: 0.9rem;
+    color: var(--cor-texto-secundario);
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--cor-borda);
 }
-.detail-item span {
-    font-size: 0.8rem;
-    color: #64748b;
-    font-weight: 500;
-    margin-bottom: 6px;
+.ticket-header-card .meta-info strong {
+    color: var(--cor-texto-principal);
+}
+
+/* ================================== */
+/* ===== COLUNA LATERAL (SIDEBAR) ===== */
+/* ================================== */
+.sidebar-card {
+    background-color: var(--cor-superficie);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    box-shadow: var(--sombra-suave);
+}
+.sidebar-card h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--cor-texto-secundario);
+    padding: 12px 15px;
+    margin: 0;
+    border-bottom: 1px solid var(--cor-borda);
+}
+.sidebar-card .card-content { padding: 15px; }
+.detail-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+.detail-item:last-child { border-bottom: none; }
+.detail-item .label { font-weight: 500; color: var(--cor-texto-secundario); }
+.detail-item .value { font-weight: 600; color: var(--cor-texto-principal); text-align: right; }
+.anexos-chamado ul { list-style: none; padding: 0; }
+.anexos-chamado li { margin-bottom: 8px; }
+.anexos-chamado a { font-weight: 500; word-break: break-all; }
+.danger-zone h3 { background-color: #fff1f2; color: var(--cor-erro); border-color: #ffe4e6; }
+
+/* ================================== */
+/* ===== TIMELINE DO HISTÓRICO    ===== */
+/* ================================== */
+.timeline {
+    position: relative;
+    padding-left: 25px;
+    border-left: 3px solid #e5e7eb;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+.timeline-item:last-child { margin-bottom: 0; }
+.timeline-icon {
+    position: absolute;
+    left: -40px;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--cor-fundo);
     display: flex;
     align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
 }
-.detail-item p {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0;
+/* Estilo dos ícones e cores por tipo */
+.timeline-item.comentario .timeline-icon { color: #3b82f6; }
+.timeline-item.agente-ti .timeline-icon { color: #16a34a; }
+.timeline-item.interno .timeline-icon { color: #6366f1; }
+.timeline-item.evento-sistema .timeline-icon { color: #6b7280; }
+
+.timeline-content {
+    background-color: var(--cor-superficie);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-borda);
+    overflow: hidden;
 }
-
-/* Ícones para os labels de detalhes */
-.detail-item span.label-status::before { content: '\f024'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; color: #6b7280; }
-.detail-item span.label-prioridade::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; color: #f59e0b; }
-.detail-item span.label-categoria::before { content: '\f02c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; color: #3b82f6; }
-
-/* Pílula de status */
-.detail-item p.status { 
-    display: inline-block; 
-    width: fit-content; 
-    color: white; 
-    padding: 6px 14px; 
-    border-radius: 20px; 
-    font-size: 0.9rem; 
-    font-weight: 600;
+.timeline-header {
+    padding: 10px 15px;
+    background-color: #f9fafb;
+    border-bottom: 1px solid var(--cor-borda);
+    font-size: 0.9rem;
+    color: var(--cor-texto-secundario);
 }
-.status-aberto { background-color: #3b82f6; }
-.status-em-andamento { background-color: #f59e0b; }
-.status-aguardando-solicitante { background-color: #6b7280; }
-.status-pausado { background-color: #6366f1; }
-.status-resolvido { background-color: #22c55e; }
-.status-cancelado { background-color: #ef4444; }
-
-/* Bloco de Anexos da Abertura */
-.anexos-chamado { border-left: 4px solid #0891b2; } /* Cor ciano */
-.anexos-chamado h3::before { content: '\f0c6'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 10px; }
-.anexos-chamado ul { list-style: none; padding: 0; margin: 0; }
-.anexos-chamado li { margin-bottom: 8px; }
-.anexos-chamado li:last-child { margin-bottom: 0; }
-.anexos-chamado a { color: #0d6efd; text-decoration: none; font-weight: 500; }
-.anexos-chamado a:hover { text-decoration: underline; }
-.anexos-chamado a::before { content: '\f019'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; }
-.tamanho-anexo { margin-left: 8px; font-size: 0.85em; color: #64748b; }
-
-/* Histórico e Comentários */
-.historico-chamado .comentario { border: 1px solid #eef2f7; border-radius: 8px; margin-bottom: 15px; background-color: #ffffff; overflow: hidden; }
-.historico-chamado .comentario-header { background-color: #f8fafc; padding: 10px 15px; border-bottom: 1px solid #eef2f7; font-size: 0.9em; color: #475569;}
-.historico-chamado .comentario-corpo { padding: 15px; line-height: 1.6; }
-
-/* ======================================================== */
-/* ===== INÍCIO DOS NOVOS ESTILOS PARA AS FUNCIONALIDADES ===== */
-/* ======================================================== */
-
-/* 1. Anexos dentro dos comentários */
+.timeline-header strong { color: var(--cor-texto-principal); }
+.timeline-body {
+    padding: 15px;
+    line-height: 1.7;
+}
 .comentario-anexos {
     padding: 15px;
-    background-color: #f8fafc; /* Fundo levemente diferente para destacar */
-    border-top: 1px solid #eef2f7;
-}
-.comentario-anexos strong {
-    font-size: 0.9em;
-    color: #475569;
-    margin-bottom: 10px;
-    display: block;
-}
-.comentario-anexos ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.comentario-anexos li {
-    font-size: 0.9rem;
-    margin-bottom: 5px;
-    display: flex;
-    align-items: center;
-}
-.comentario-anexos li:last-child {
-    margin-bottom: 0;
-}
-.comentario-anexos a {
-    color: #0d6efd;
-    text-decoration: none;
-    font-weight: 500;
-}
-.comentario-anexos a:hover {
-    text-decoration: underline;
-}
-.comentario-anexos .fa-paperclip {
-    margin-right: 8px;
-    color: #64748b;
-}
-
-/* 2. Preview de Imagens Coladas (Ctrl+V) */
-.paste-preview-container {
-    display: none; /* Começa oculto */
-    flex-wrap: wrap;
-    gap: 10px;
     margin-top: 15px;
-    padding: 10px;
-    border: 2px dashed #cbd5e1; /* Borda tracejada mais suave */
-    border-radius: 8px;
-    background-color: #f8fafc;
+    background-color: #f9fafb;
+    border-top: 1px solid var(--cor-borda);
 }
-.paste-preview-item {
-    position: relative;
-    border: 1px solid #e2e8f0;
-    border-radius: 5px;
-    overflow: hidden;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.paste-preview-item img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    display: block;
-}
-.paste-preview-remove {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(0, 0, 0, 0.5);
+.tag-interno {
+    background-color: #6366f1;
     color: white;
-    border: none;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    font-size: 14px;
-    line-height: 22px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.paste-preview-remove:hover {
-    background: #ef4444; /* Vermelho no hover */
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
 }
 
-
-/* 3. Zona de Perigo e Modal de Exclusão */
-.danger-zone {
-    border: 1px solid #fecaca;
-    border-left: 4px solid #ef4444;
-    border-radius: 8px;
-    margin-top: 30px;
-    background-color: #fef2f2;
+/* NOVO: Estilo para os Eventos do Sistema na Timeline */
+.timeline-item.evento-sistema {
+    padding: 8px 15px;
+    background-color: #f9fafb;
+    border-radius: var(--raio-borda);
 }
-.danger-zone h3 {
-    font-size: 1rem;
-    background-color: transparent;
-    color: #b91c1c;
-    border-bottom: 1px solid #fecaca;
-    padding: 15px;
+.timeline-content-evento {
+    display: inline;
+    color: var(--cor-texto-secundario);
 }
-.danger-zone h3::before {
-    content: '\f12a'; /* Ícone de exclamação */
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    margin-right: 10px;
-}
-.danger-zone .card-content {
-    padding: 15px;
-    color: #b91c1c;
-}
-.btn-danger {
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-.btn-danger:hover {
-    background-color: #dc2626;
-}
-.btn-danger:disabled {
-    background-color: #fca5a5;
-    cursor: not-allowed;
+.timeline-data-evento {
+    display: inline;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    margin-left: 8px;
 }
 
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(17, 24, 39, 0.6); /* Fundo mais escuro */
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px); /* Efeito de desfoque no fundo */
-}
-.modal-content {
-    background: white;
-    padding: 0;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    animation: slide-down 0.3s ease-out;
-}
-.modal-header {
-    padding: 15px 20px;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.modal-header-danger {
-    background-color: #dc2626;
-    color: white;
-    border-radius: 8px 8px 0 0;
-}
-.modal-header h2 {
-    margin: 0;
-    font-size: 1.25rem;
-}
-.modal-close {
-    font-size: 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    color: white;
-    text-shadow: none;
-    opacity: 0.9;
-}
-.modal-body {
-    padding: 25px;
-    line-height: 1.6;
-}
-#input-confirmacao {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px;
-    margin-top: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #d1d5db;
-    border-radius: 5px;
-    font-size: 1rem;
-    text-align: center;
-    letter-spacing: 2px;
-}
-#input-confirmacao:focus {
-    border-color: #dc2626;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-}
-@keyframes slide-down {
-    from { transform: translateY(-30px) scale(0.98); opacity: 0; }
-    to { transform: translateY(0) scale(1); opacity: 1; }
-}
+/* Formulário de novo comentário */
+.novo-comentario .action-button { text-align: right; margin-top: 10px; }
+.checkbox-interno { display: flex; align-items: center; gap: 8px; margin-top: 15px; }

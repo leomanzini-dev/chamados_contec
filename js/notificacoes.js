@@ -1,5 +1,4 @@
-// js/notificacoes.js
-
+// js/notificacoes.js (VERSÃO FINAL E CORRETA)
 function showToast(mensagem, tipo = 'sucesso') {
     const container = document.getElementById('toast-container');
     if (!container) {
@@ -7,37 +6,30 @@ function showToast(mensagem, tipo = 'sucesso') {
         return;
     }
 
-    // Cria o elemento principal do toast
     const toastElement = document.createElement('div');
-    toastElement.className = `toast ${tipo}`; // Adiciona a classe base e a classe do tipo (sucesso, erro, aviso)
+    toastElement.className = `toast ${tipo}`;
 
-    // Define o ícone correto com base no tipo de notificação
-    let iconeClasse = 'fa-info-circle'; // Ícone padrão
-    if (tipo === 'sucesso') {
-        iconeClasse = 'fa-check-circle';
-    } else if (tipo === 'erro') {
-        iconeClasse = 'fa-times-circle';
-    } else if (tipo === 'aviso') {
-        iconeClasse = 'fa-exclamation-triangle';
-    }
+    const icones = {
+        sucesso: 'fa-check-circle',
+        erro: 'fa-times-circle',
+        aviso: 'fa-exclamation-triangle'
+    };
+    const iconeClasse = icones[tipo] || 'fa-info-circle';
 
-    // Monta o HTML interno do toast com o ícone e a mensagem
     toastElement.innerHTML = `
-        <i class="fa-solid ${iconeClasse}"></i>
-        <span class="mensagem-toast">${mensagem}</span>
+        <div class="icon-toast">
+            <i class="fa-solid ${iconeClasse}"></i>
+        </div>
+        <div class="mensagem-toast">${mensagem}</div>
+        <div class="progress-bar"></div>
     `;
 
-    // Adiciona o novo toast no container (usamos prepend para o mais novo aparecer no topo)
     container.prepend(toastElement);
 
-    // Define um tempo para remover o toast automaticamente após 5 segundos
     setTimeout(() => {
-        // Adiciona uma animação de saída para suavidade (opcional)
         toastElement.style.animation = 'toastFadeOut 0.5s ease-out forwards';
-        
-        // Remove o elemento do HTML após a animação de saída terminar
         toastElement.addEventListener('animationend', () => {
             toastElement.remove();
         });
-    }, 5000); // Tempo que a notificação fica na tela
+    }, 5000);
 }
